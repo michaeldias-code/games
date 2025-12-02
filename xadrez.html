@@ -33,8 +33,12 @@
     .white { background: #f0d9b5; }
     .black { background: #b58863; }
 
-    .piece { cursor: grab; }
-    .piece:active { cursor: grabbing; }
+    /* Rodapé */
+    #footer {
+        margin-top: 20px;
+        font-size: 14px;
+        color: #555;
+    }
 
     @media (max-width: 600px) {
         .board {
@@ -44,21 +48,13 @@
             grid-template-rows: repeat(8, 1fr);
         }
         .square { width: 100%; height: 100%; font-size: 11vw; }
-        .piece { font-size: 11vw; }
-    }
-
-    /* RODAPÉ */
-    #footer {
-        margin-top: 20px;
-        font-size: 14px;
-        color: #555;
     }
 </style>
 </head>
 <body>
 
 <div class="board" id="board"></div>
-<div id="footer">@DM</div>
+<div id="footer">@DM_v2</div>
 
 <script>
 const board = document.getElementById("board");
@@ -74,6 +70,10 @@ const initialPositions = [
     "♖","♘","♗","♕","♔","♗","♘","♖"
 ];
 
+const squares = [];
+let selectedPiece = null;
+
+// Criar casas e peças
 for (let i = 0; i < 64; i++) {
     const square = document.createElement("div");
     const row = Math.floor(i / 8);
@@ -81,77 +81,30 @@ for (let i = 0; i < 64; i++) {
 
     square.classList.add("square");
     square.classList.add((row + col) % 2 === 0 ? "white" : "black");
+    square.dataset.index = i;
 
     if (initialPositions[i] !== "") {
         const piece = document.createElement("div");
         piece.textContent = initialPositions[i];
         piece.classList.add("piece");
-        piece.draggable = true;
         square.appendChild(piece);
     }
 
+    square.addEventListener("click", () => {
+        if (square.firstChild && square.firstChild.classList.contains("piece")) {
+            // Seleciona a peça
+            selectedPiece = square.firstChild;
+        } else if (selectedPiece) {
+            // Move a peça para a casa clicada
+            square.innerHTML = "";
+            square.appendChild(selectedPiece);
+            selectedPiece = null;
+        }
+    });
+
     board.appendChild(square);
+    squares.push(square);
 }
-
-// --- MOBILE ---
-let selectedPiece = null;
-
-board.addEventListener("touchstart", (e) => {
-    const t = e.target;
-    if (t.classList.contains("piece")) {
-        selectedPiece = t;
-        t.style.opacity = "0.5";
-    }
-}, { passive: true });
-
-board.addEventListener("touchend", (e) => {
-    if (!selectedPiece) return;
-
-    const touch = e.changedTouches[0];
-    const elem = document.elementFromPoint(touch.clientX, touch.clientY);
-
-    let square = null;
-    if (elem.classList.contains("square")) {
-        square = elem;
-    } else if (elem.parentElement?.classList.contains("square")) {
-        square = elem.parentElement;
-    }
-
-    if (square) {
-        square.innerHTML = "";
-        square.appendChild(selectedPiece);
-    }
-
-    selectedPiece.style.opacity = "1";
-    selectedPiece = null;
-});
-
-// --- DESKTOP ---
-let draggedPiece = null;
-
-document.addEventListener("dragstart", (e) => {
-    if (e.target.classList.contains("piece")) {
-        draggedPiece = e.target;
-    }
-});
-
-document.addEventListener("dragover", (e) => e.preventDefault());
-
-document.addEventListener("drop", (e) => {
-    e.preventDefault();
-    const square = e.target.classList.contains("square")
-        ? e.target
-        : e.target.parentElement.classList.contains("square")
-            ? e.target.parentElement
-            : null;
-
-    if (square && draggedPiece) {
-        square.innerHTML = "";
-        square.appendChild(draggedPiece);
-    }
-
-    draggedPiece = null;
-});
 </script>
 
 </body>
