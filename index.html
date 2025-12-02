@@ -8,7 +8,7 @@
 body {
     margin:0;
     background:#f0f0f0;
-    font-family:Arial, sans-serif;
+    font-family:Arial;
     display:flex;
     flex-direction:column;
     align-items:center;
@@ -16,11 +16,13 @@ body {
 }
 
 #board {
-    width:480px;
-    height:480px;
     display:grid;
-    grid-template-columns: repeat(8, 60px);
-    grid-template-rows: repeat(8, 60px);
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    width: 90vw;        /* responsivo no celular */
+    height: 90vw;       /* mantém quadrado */
+    max-width:480px;    /* limite para PC */
+    max-height:480px;
     border:4px solid #333;
     box-shadow:0 0 10px #0004;
 }
@@ -39,8 +41,8 @@ body {
 .light{background:#eac99f;}
 
 .piece {
-    width:48px;
-    height:48px;
+    width:80%;
+    height:80%;
     border-radius:50%;
     display:flex;
     justify-content:center;
@@ -56,21 +58,20 @@ body {
 .dama{border:4px solid gold;}
 .highlight {box-shadow: 0 0 15px yellow inset; transition: box-shadow 0.5s ease;}
 
-#status{margin-top:20px;font-size:22px;}
-button{margin-top:10px;padding:10px 20px;font-size:16px}
+#status{
+    margin-top:20px;
+    font-size:22px;
+    text-align:center;
+}
 
-/* ===== ADAPTAÇÃO PARA CELULAR ===== */
+button{
+    margin-top:10px;
+    padding:10px 20px;
+    font-size:16px;
+}
+
 @media (max-width: 600px) {
-    #board {
-        width: 90vw;
-        height: 90vw;
-        grid-template-columns: repeat(8, 1fr);
-        grid-template-rows: repeat(8, 1fr);
-    }
-    .cell { font-size: calc(4vw); }
-    .piece { width: 80%; height: 80%; font-size: calc(3vw); }
-    #status { font-size: 18px; }
-    button { font-size: 16px; padding: 8px 15px; }
+    .piece { font-size:5vw; }
 }
 </style>
 </head>
@@ -79,7 +80,6 @@ button{margin-top:10px;padding:10px 20px;font-size:16px}
 <div id="board"></div>
 <div id="status">Sua vez</div>
 <button onclick="resetMemory()">Resetar Memória da IA</button>
-
 <script>
 let board = Array(64).fill(null), playing=true, human="r", ai="b";
 let memory = JSON.parse(localStorage.getItem("ia_damas_memory")||"{}");
@@ -168,7 +168,7 @@ function getMoves(board, pos) {
                             newBoard[scan] = null;
                             let multi = multiCaps(newBoard, land, p.color, [scan]);
                             if (multi.length === 0) captures.push([pos, land, [scan]]);
-                            else multi.forEach(m => captures.push([pos, m.end, m.caps]));
+                            else multi.forEach(m => captures.push([pos, m.end, [scan, ...m.caps]]));
                         }
                     }
                     break;
@@ -188,7 +188,7 @@ function getMoves(board, pos) {
                     newBoard[mid] = null;
                     let multi = multiCaps(newBoard, land, p.color, [mid]);
                     if (multi.length === 0) captures.push([pos, land, [mid]]);
-                    else multi.forEach(m => captures.push([pos, land, [mid, ...m.caps]]));
+                    else multi.forEach(m => captures.push([pos, land, [mid, ...multi[0].caps]]));
                 }
             }
         }
