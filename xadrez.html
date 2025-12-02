@@ -1,63 +1,65 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Xadrez</title>
+<title>Xadrez Responsivo</title>
 <style>
 body {
     display: flex;
-    flex-direction: column;
+    justify-content: center;
     align-items: center;
-    margin-top: 20px;
+    flex-direction: column;
+    min-height: 100vh;
     background: #e7e7e7;
     font-family: Arial, sans-serif;
+    margin: 0;
 }
-
 .board {
     display: grid;
-    grid-template-columns: repeat(8, 80px);
-    grid-template-rows: repeat(8, 80px);
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    max-width: 600px;  /* desktop */
+    max-height: 600px;
+    width: 90vw;       /* mobile */
+    height: 90vw;
     border: 4px solid #333;
 }
-
 .square {
-    width: 80px;
-    height: 80px;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 52px;
+    font-size: 5vw;  /* cresce proporcionalmente */
     user-select: none;
 }
-
 .white { background: #f0d9b5; }
 .black { background: #b58863; }
-
-#footer {
-    margin-top: 20px;
-    font-size: 14px;
-    color: #555;
+.piece {
+    cursor: pointer;
+    font-size: inherit;
 }
-
-/* Ajustes para celular */
-@media (max-width: 600px) {
-    .board {
-        width: 90vw;
-        height: 90vw;
-        grid-template-columns: repeat(8, 1fr);
-        grid-template-rows: repeat(8, 1fr);
-    }
-    .square { font-size: 10vw; }
+.status {
+    margin-top: 15px;
+    font-size: 1.2rem;
+}
+.footer {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: #555;
 }
 </style>
 </head>
 <body>
 
+<h1>Xadrez Responsivo</h1>
 <div class="board" id="board"></div>
-<div id="footer">@DM</div>
+<div class="status" id="status">Clique na peça e depois na casa desejada</div>
+<div class="footer">@DM*</div>
 
 <script>
-const board = document.getElementById("board");
+const boardDiv = document.getElementById("board");
+const statusDiv = document.getElementById("status");
+
+// Posições iniciais usando Unicode
 const initialPositions = [
     "♜","♞","♝","♛","♚","♝","♞","♜",
     "♟","♟","♟","♟","♟","♟","♟","♟",
@@ -69,35 +71,54 @@ const initialPositions = [
     "♖","♘","♗","♕","♔","♗","♘","♖"
 ];
 
-let selectedPiece = null;
+let board = Array(64).fill(null);
+let selected = null;
 
+// Cria tabuleiro
 for (let i = 0; i < 64; i++) {
     const square = document.createElement("div");
+    square.classList.add("square");
     const row = Math.floor(i / 8);
     const col = i % 8;
-
-    square.classList.add("square");
     square.classList.add((row + col) % 2 === 0 ? "white" : "black");
     square.dataset.index = i;
+    square.addEventListener("click", () => squareClick(i));
+    boardDiv.appendChild(square);
 
+    // Adiciona peça
     if (initialPositions[i] !== "") {
         const piece = document.createElement("div");
         piece.textContent = initialPositions[i];
         piece.classList.add("piece");
+        board[i] = piece.textContent;
         square.appendChild(piece);
     }
+}
 
-    square.addEventListener("click", () => {
-        if (square.firstChild && square.firstChild.classList.contains("piece")) {
-            selectedPiece = square.firstChild;
-        } else if (selectedPiece) {
-            square.innerHTML = "";
-            square.appendChild(selectedPiece);
-            selectedPiece = null;
+function render() {
+    for (let i = 0; i < 64; i++) {
+        const square = boardDiv.children[i];
+        square.innerHTML = "";
+        if (board[i]) {
+            const piece = document.createElement("div");
+            piece.textContent = board[i];
+            piece.classList.add("piece");
+            square.appendChild(piece);
         }
-    });
+    }
+}
 
-    board.appendChild(square);
+// Clique na peça ou na casa
+function squareClick(i) {
+    if (selected === null) {
+        if (board[i]) selected = i; // seleciona a peça
+    } else {
+        // move peça
+        board[i] = board[selected];
+        board[selected] = null;
+        selected = null;
+        render();
+    }
 }
 </script>
 
