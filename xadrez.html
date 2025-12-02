@@ -56,13 +56,17 @@ h1 {
 /* ===== Responsivo ===== */
 @media (max-width: 600px) {
     .board {
-        width: 90vw;
-        height: 90vw;
+        width: 95vw;
+        height: 95vw;
+        margin: 0 auto; /* centraliza horizontalmente */
         grid-template-columns: repeat(8, 1fr);
         grid-template-rows: repeat(8, 1fr);
     }
-    .square { font-size: 10vw; }
+    .square { 
+        font-size: 13vw; /* aumenta o tamanho da peça */
+    }
 }
+
 </style>
 </head>
 <body>
@@ -140,3 +144,4 @@ function clearHighlights(){
 
 </body>
 </html>
+
