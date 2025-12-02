@@ -1,57 +1,70 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Xadrez Responsivo</title>
+<title>Xadrez - Responsivo</title>
 <style>
 body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
     margin: 0;
-    background: #e7e7e7;
-    font-family: Arial, sans-serif;
+    display: flex;
     flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    font-family: Arial, sans-serif;
+    background: #e7e7e7;
+    padding: 20px;
 }
-
-.board {
+h1 {
+    margin-bottom: 20px;
+}
+#board {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
     grid-template-rows: repeat(8, 1fr);
-    width: 95vw;
+    width: 90vw;
     max-width: 480px;
     aspect-ratio: 1 / 1;
     border: 4px solid #333;
+    box-shadow: 0 0 10px #0004;
 }
-
 .square {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 4vmin;
+    font-size: calc(90vw / 8 * 0.9);
     user-select: none;
+    box-sizing: border-box;
 }
-
 .white { background: #f0d9b5; }
 .black { background: #b58863; }
-
 .piece {
+    width: 90%;
+    height: 90%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     cursor: pointer;
-    font-size: 5vmin;
+}
+#signature {
+    margin-top: 20px;
+    font-size: 14px;
+    color: #555;
 }
 </style>
 </head>
 <body>
 
-<div class="board" id="board"></div>
-<div style="margin-top:10px;font-size:14px;color:#555;">@DM</div>
+<h1>Xadrez - Responsivo</h1>
+<div id="board"></div>
+<div id="signature">@DM</div>
 
 <script>
-// Board e peças
-const board = document.getElementById("board");
+const boardDiv = document.getElementById("board");
+let board = Array(64).fill("");
+let selected = null;
 
-const initialPositions = [
+// Peças iniciais
+const initial = [
     "♜","♞","♝","♛","♚","♝","♞","♜",
     "♟","♟","♟","♟","♟","♟","♟","♟",
     "","","","","","","","",
@@ -62,47 +75,56 @@ const initialPositions = [
     "♖","♘","♗","♕","♔","♗","♘","♖"
 ];
 
-// Cria casas e peças
-for (let i = 0; i < 64; i++) {
-    const square = document.createElement("div");
-    const row = Math.floor(i / 8);
-    const col = i % 8;
+// Criar casas e renderizar peças
+function renderBoard() {
+    boardDiv.innerHTML = "";
+    for (let i = 0; i < 64; i++) {
+        const square = document.createElement("div");
+        const row = Math.floor(i / 8);
+        const col = i % 8;
+        square.className = "square " + ((row + col) % 2 === 0 ? "white" : "black");
+        square.dataset.index = i;
 
-    square.classList.add("square");
-    square.classList.add((row + col) % 2 === 0 ? "white" : "black");
-    square.dataset.index = i;
+        if (board[i]) {
+            const piece = document.createElement("div");
+            piece.className = "piece";
+            piece.textContent = board[i];
+            square.appendChild(piece);
+        }
 
-    if (initialPositions[i] !== "") {
-        const piece = document.createElement("div");
-        piece.textContent = initialPositions[i];
-        piece.classList.add("piece");
-        square.appendChild(piece);
+        square.onclick = () => clickSquare(i);
+        boardDiv.appendChild(square);
     }
-
-    board.appendChild(square);
 }
 
-// --- CLIQUE PARA MOVER ---
-let selectedPiece = null;
-let selectedSquare = null;
-
-board.addEventListener("click", e => {
-    const target = e.target.classList.contains("square") ? e.target : e.target.parentElement;
-    if (!target.classList.contains("square")) return;
-
-    if (selectedPiece) {
-        // Mover peça para nova casa
-        if (target !== selectedSquare) {
-            target.innerHTML = "";
-            target.appendChild(selectedPiece);
-        }
-        selectedPiece = null;
-        selectedSquare = null;
-    } else if (target.children.length > 0) {
-        // Seleciona a peça
-        selectedPiece = target.children[0];
-        selectedSquare = target;
+function clickSquare(i) {
+    if (selected === null && board[i]) {
+        selected = i;
+        highlightSelected();
+    } else if (selected !== null) {
+        // mover peça
+        board[i] = board[selected];
+        board[selected] = "";
+        selected = null;
+        renderBoard();
     }
+}
+
+function highlightSelected() {
+    boardDiv.childNodes.forEach((sq, idx) => {
+        sq.style.outline = idx === selected ? "3px solid yellow" : "none";
+    });
+}
+
+// Inicializar
+board = [...initial];
+renderBoard();
+
+// Responsividade ao redimensionar
+window.addEventListener("resize", () => {
+    document.querySelectorAll(".square").forEach(sq => {
+        sq.style.fontSize = `calc(${boardDiv.clientWidth} / 8 * 0.9)`;
+    });
 });
 </script>
 
