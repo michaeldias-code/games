@@ -14,65 +14,45 @@ body {
     align-items:center;
     padding:20px;
 }
-
 #board {
-    display:grid;
+    display: grid;
     grid-template-columns: repeat(8, 1fr);
     grid-template-rows: repeat(8, 1fr);
-    width: 90vw;        /* responsivo no celular */
-    height: 90vw;       /* mantém quadrado */
-    max-width:480px;    /* limite para PC */
-    max-height:480px;
+    width: 95vw;
+    max-width: 480px;
+    aspect-ratio: 1 / 1;
     border:4px solid #333;
     box-shadow:0 0 10px #0004;
 }
-
 .cell {
     display:flex;
     justify-content:center;
     align-items:center;
-    font-size:26px;
+    font-size:4vw;
     cursor:pointer;
     user-select:none;
     box-sizing:border-box;
 }
-
 .dark {background:#7a4a2d;}
 .light{background:#eac99f;}
-
 .piece {
-    width:80%;
-    height:80%;
+    width:90%;
+    height:90%;
     border-radius:50%;
     display:flex;
     justify-content:center;
     align-items:center;
     color:white;
     font-weight:bold;
-    box-shadow:0 0 8px #000;
+    box-shadow:0 0 5px #000;
     transition: transform 0.2s;
 }
-
 .red{background:#d33;}
 .black{background:#777;color:#ffd;}
 .dama{border:4px solid gold;}
 .highlight {box-shadow: 0 0 15px yellow inset; transition: box-shadow 0.5s ease;}
-
-#status{
-    margin-top:20px;
-    font-size:22px;
-    text-align:center;
-}
-
-button{
-    margin-top:10px;
-    padding:10px 20px;
-    font-size:16px;
-}
-
-@media (max-width: 600px) {
-    .piece { font-size:5vw; }
-}
+#status{margin-top:20px;font-size:22px;text-align:center;}
+button{margin-top:10px;padding:10px 20px;font-size:16px;}
 </style>
 </head>
 <body>
@@ -168,7 +148,7 @@ function getMoves(board, pos) {
                             newBoard[scan] = null;
                             let multi = multiCaps(newBoard, land, p.color, [scan]);
                             if (multi.length === 0) captures.push([pos, land, [scan]]);
-                            else multi.forEach(m => captures.push([pos, m.end, [scan, ...m.caps]]));
+                            else multi.forEach(m => captures.push([pos, m.end, m.caps]));
                         }
                     }
                     break;
@@ -188,7 +168,7 @@ function getMoves(board, pos) {
                     newBoard[mid] = null;
                     let multi = multiCaps(newBoard, land, p.color, [mid]);
                     if (multi.length === 0) captures.push([pos, land, [mid]]);
-                    else multi.forEach(m => captures.push([pos, land, [mid, ...multi[0].caps]]));
+                    else multi.forEach(m => captures.push([pos, land, [mid, ...m.caps]]));
                 }
             }
         }
