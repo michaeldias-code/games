@@ -51,7 +51,7 @@
 
 <script>
 // --- SISTEMA DE APRENDIZADO DA IA ----
-// MemÛria no formato: { estadoDoTabuleiro: { jogada: peso } }
+// Mem√≥ria no formato: { estadoDoTabuleiro: { jogada: peso } }
 let memory = JSON.parse(localStorage.getItem("ia_tictactoe_memory") || "{}");
 
 // Estado da partida
@@ -61,7 +61,7 @@ let human = "X";
 let ai = "O";
 let movesHistory = [];  // guarda {state, move} para aprender ao final
 
-// Inicializa o tabuleiro na p·gina
+// Inicializa o tabuleiro na p√°gina
 const boardDiv = document.getElementById("board");
 const statusDiv = document.getElementById("status");
 
@@ -92,7 +92,7 @@ function checkWinner(b = board) {
     return null;
 }
 
-// FunÁ„o para encontrar jogada de ataque ou bloqueio
+// Fun√ß√£o para encontrar jogada de ataque ou bloqueio
 function findTacticalMove(player) {
     const wins = [
         [0,1,2],[3,4,5],[6,7,8],
@@ -103,7 +103,7 @@ function findTacticalMove(player) {
     for (const [a, b, c] of wins) {
         const line = [board[a], board[b], board[c]];
 
-        // Se tem 2 do player e 1 vazio: È jogada de ataque/bloqueio
+        // Se tem 2 do player e 1 vazio: √© jogada de ataque/bloqueio
         if (
             line.filter(v => v === player).length === 2 &&
             line.filter(v => v === "").length === 1
@@ -140,7 +140,7 @@ function aiMove() {
         return;
     }
 
-    // --- 2. BLOQUEAR VIT”RIA DO HUMANO ---
+    // --- 2. BLOQUEAR VIT√ìRIA DO HUMANO ---
     const blockMove = findTacticalMove(human);
     if (blockMove !== null) {
         movesHistory.push({ state, move: blockMove });
@@ -150,7 +150,7 @@ function aiMove() {
         return;
     }
 
-    // --- 3. CASO N√O HAJA T¡TICA ”BVIA, USAR APRENDIZADO ---
+    // --- 3. CASO N√ÉO HAJA T√ÅTICA √ìBVIA, USAR APRENDIZADO ---
     if (!memory[state]) memory[state] = {};
 
     const moves = [];
@@ -176,7 +176,7 @@ function aiMove() {
     endCheck();
 }
 
-// --- APRENDIZADO COM REFOR«O ---
+// --- APRENDIZADO COM REFOR√áO ---
 function endCheck() {
     const res = checkWinner();
 
@@ -185,10 +185,10 @@ function endCheck() {
 
     if (res === ai) {
         statusDiv.textContent = "A IA venceu!";
-        learn(+5);  // reforÁo positivo
+        learn(+5);  // refor√ßo positivo
     } else if (res === human) {
-        statusDiv.textContent = "VocÍ venceu!";
-        learn(-10); // penaliza bastante (n„o repete derrota)
+        statusDiv.textContent = "Voc√™ venceu!";
+        learn(-10); // penaliza bastante (n√£o repete derrota)
     } else {
         statusDiv.textContent = "Deu velha!";
         learn(+1);  // pequena recompensa por sobreviver bastante
