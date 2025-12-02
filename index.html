@@ -3,147 +3,90 @@
 <head>
 <meta charset="UTF-8">
 <title>Damas Brasileiras — IA Aprendente</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-/* ============================== */
-/* ESTILO GERAL (funciona igual no PC) */
-/* ============================== */
 body {
-    margin: 0;
-    background: #f0f0f0;
-    font-family: Arial;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
+    margin:0;
+    background:#f0f0f0;
+    font-family:Arial, sans-serif;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:20px;
 }
 
 #board {
-    width: 480px;
-    height: 480px;
-    display: grid;
+    width:480px;
+    height:480px;
+    display:grid;
     grid-template-columns: repeat(8, 60px);
     grid-template-rows: repeat(8, 60px);
-    border: 4px solid #333;
-    box-shadow: 0 0 10px #0004;
+    border:4px solid #333;
+    box-shadow:0 0 10px #0004;
 }
 
 .cell {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 26px;
-    cursor: pointer;
-    user-select: none;
-    box-sizing: border-box;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:26px;
+    cursor:pointer;
+    user-select:none;
+    box-sizing:border-box;
 }
 
-.dark { background: #7a4a2d; }
-.light { background: #eac99f; }
+.dark {background:#7a4a2d;}
+.light{background:#eac99f;}
 
 .piece {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    font-weight: bold;
-    box-shadow: 0 0 8px #000;
+    width:48px;
+    height:48px;
+    border-radius:50%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:white;
+    font-weight:bold;
+    box-shadow:0 0 8px #000;
     transition: transform 0.2s;
 }
 
-.red { background: #d33; }
-.black { background: #777; color: #ffd; }
-.dama { border: 4px solid gold; }
+.red{background:#d33;}
+.black{background:#777;color:#ffd;}
+.dama{border:4px solid gold;}
+.highlight {box-shadow: 0 0 15px yellow inset; transition: box-shadow 0.5s ease;}
 
-.highlight {
-    box-shadow: 0 0 15px yellow inset;
-    transition: box-shadow 0.5s ease;
-}
+#status{margin-top:20px;font-size:22px;}
+button{margin-top:10px;padding:10px 20px;font-size:16px}
 
-#status {
-    margin-top: 20px;
-    font-size: 22px;
-}
-
-button {
-    margin-top: 10px;
-    padding: 10px 20px;
-    font-size: 16px;
-}
-
-
-/* ============================== */
-/* RESPONSIvIDADE (CELULAR) */
-/* NÃO altera nada do PC */
-/* ============================== */
-
-@media (max-width: 500px) {
-
-    body {
-        padding: 5px;
-    }
-
-    /* Tabuleiro maior no celular */
+/* ===== ADAPTAÇÃO PARA CELULAR ===== */
+@media (max-width: 600px) {
     #board {
-        width: 98vw;
-        height: 98vw;
-
-        /* células ainda proporcionais */
+        width: 90vw;
+        height: 90vw;
         grid-template-columns: repeat(8, 1fr);
         grid-template-rows: repeat(8, 1fr);
-
-        border-width: 3px;
     }
-
-    /* Peças bem maiores */
-    .piece {
-        width: 13vw;
-        height: 13vw;
-        font-size: 6vw;
-        box-shadow: 0 0 6px #000;
-    }
-
-    /* Texto maior */
-    #status {
-        font-size: 7vw;
-        margin-top: 15px;
-    }
-
-    /* Botões maiores e mais tocáveis */
-    button {
-        font-size: 5vw;
-        padding: 12px 20px;
-    }
-
-    h1 {
-        font-size: 8vw;
-        text-align: center;
-    }
+    .cell { font-size: calc(4vw); }
+    .piece { width: 80%; height: 80%; font-size: calc(3vw); }
+    #status { font-size: 18px; }
+    button { font-size: 16px; padding: 8px 15px; }
 }
-
 </style>
 </head>
 <body>
-
 <h1>Damas Brasileiras — IA Aprendente</h1>
-
 <div id="board"></div>
-
 <div id="status">Sua vez</div>
-
 <button onclick="resetMemory()">Resetar Memória da IA</button>
 
 <script>
-/* === LOGICA ORIGINAL (NÃO ALTERADA) === */
-
 let board = Array(64).fill(null), playing=true, human="r", ai="b";
 let memory = JSON.parse(localStorage.getItem("ia_damas_memory")||"{}");
 let moveHistory=[], selected=null;
 const dirsP = {"r":[-7,-9],"b":[7,9]}, dirsD=[-7,-9,7,9];
 const boardDiv=document.getElementById("board");
+const status=document.getElementById("status");
 
 // ===== RENDER =====
 for(let i=0;i<64;i++){
@@ -205,55 +148,56 @@ function multiCaps(b, pos, color, visited=[]) {
 
 // ===== GET MOVES =====
 function getMoves(board, pos) {
-    let p=board[pos]; if(!p) return [];
-    let moves=[], captures=[];
-    let directions=p.dama?dirsD:dirsP[p.color];
+    let p = board[pos]; if (!p) return [];
+    let moves = [], captures = [];
+    let directions = p.dama ? dirsD : dirsP[p.color];
 
-    for(let d of directions){
-        if(p.dama){
-            let scan=pos+d;
-            while(inside(scan) && diagLong(scan-d,scan)){
-                if(!board[scan]) moves.push([pos,scan]);
+    for (let d of directions) {
+        if (p.dama) {
+            let scan = pos + d;
+            while (inside(scan) && diagLong(scan - d, scan)) {
+                if (!board[scan]) moves.push([pos, scan]);
                 else {
-                    let enemy=board[scan];
-                    if(enemy && enemy.color!==p.color){
-                        let land=scan+d;
-                        if(inside(land)&&diagLong(scan,land)&&!board[land]){
-                            let newBoard=cloneBoard(board);
-                            newBoard[land]=cloneBoard(p);
-                            newBoard[pos]=null;
-                            newBoard[scan]=null;
-                            let multi=multiCaps(newBoard,land,p.color,[scan]);
-                            if(multi.length===0) captures.push([pos,land,[scan]]);
-                            else multi.forEach(m=>captures.push([pos,m.end,m.caps]));
+                    let enemy = board[scan];
+                    if (enemy && enemy.color !== p.color) {
+                        let land = scan + d;
+                        if (inside(land) && diagLong(scan, land) && !board[land]) {
+                            let newBoard = cloneBoard(board);
+                            newBoard[land] = cloneBoard(p);
+                            newBoard[pos] = null;
+                            newBoard[scan] = null;
+                            let multi = multiCaps(newBoard, land, p.color, [scan]);
+                            if (multi.length === 0) captures.push([pos, land, [scan]]);
+                            else multi.forEach(m => captures.push([pos, m.end, m.caps]));
                         }
                     }
                     break;
                 }
-                scan+=d;
+                scan += d;
             }
         } else {
             let n = pos + d;
-            if (inside(n) && diagOk(pos,n) && !board[n]) moves.push([pos,n]);
-            let mid=pos+d, land=pos+2*d;
-            if(inside(mid)&&inside(land)&&diagOk(pos,mid)&&diagOk(mid,land)){
-                let e=board[mid];
-                if(e&&e.color!==p.color&&!board[land]){
-                    let newBoard=cloneBoard(board);
-                    newBoard[land]=cloneBoard(p);
-                    newBoard[pos]=null;
-                    newBoard[mid]=null;
-                    let multi=multiCaps(newBoard,land,p.color,[mid]);
-                    if(multi.length===0) captures.push([pos,land,[mid]]);
-                    else multi.forEach(m=>captures.push([pos,m.end,[mid,...m.caps]]));
+            if (inside(n) && diagOk(pos, n) && !board[n]) moves.push([pos, n]);
+            let mid = pos + d, land = pos + 2*d;
+            if (inside(mid) && inside(land) && diagOk(pos, mid) && diagOk(mid, land)) {
+                let e = board[mid];
+                if (e && e.color !== p.color && !board[land]) {
+                    let newBoard = cloneBoard(board);
+                    newBoard[land] = cloneBoard(p);
+                    newBoard[pos] = null;
+                    newBoard[mid] = null;
+                    let multi = multiCaps(newBoard, land, p.color, [mid]);
+                    if (multi.length === 0) captures.push([pos, land, [mid]]);
+                    else multi.forEach(m => captures.push([pos, land, [mid, ...m.caps]]));
                 }
             }
         }
     }
-    return captures.length?captures:moves;
+
+    return captures.length ? captures : moves;
 }
 
-// ===== HUMAN =====
+// ===== HUMAN INPUT =====
 function humanClick(i){
     if(!playing) return;
     if(!selected){
@@ -263,7 +207,7 @@ function humanClick(i){
         let mandatory=legal.filter(m=>m.length===3);
         if(mandatory.length>0) legal=mandatory;
         let chosen=legal.find(m=>m[1]===i);
-        if(chosen){playMove(chosen,human,true);if(endCheck())return;setTimeout(aiTurn,300);}
+        if(chosen){playMove(chosen,human,true);if(endCheck()) return; setTimeout(aiTurn,300);}
         selected=null;
     }
     render();
@@ -279,10 +223,9 @@ function playMove(move,color,record=false){
     if(color===ai){
         const cell = boardDiv.children[to];
         cell.classList.add("highlight");
-        setTimeout(()=>cell.classList.remove("highlight"),800);
+        setTimeout(()=>{cell.classList.remove("highlight");},800);
     }
 }
-
 function boardString(){return board.map(p=>p?(p.color+(p.dama?"D":"")):"_").join("");}
 
 // ===== AI =====
@@ -294,13 +237,13 @@ function aiTurn(){
         let longest=Math.max(...captures.map(c=>c[2].length));
         captures=captures.filter(c=>c[2].length===longest);
         let move=chooseLearned(captures);
-        playMove(move,ai,true);if(endCheck())return;status.textContent="Sua vez";return;
+        playMove(move,ai,true);if(endCheck()) return; status.textContent="Sua vez"; return;
     }
     let move=chooseLearned(moves);
-    playMove(move,ai,true);if(endCheck())return;status.textContent="Sua vez";
+    playMove(move,ai,true);if(endCheck()) return; status.textContent="Sua vez";
 }
 function getAllMoves(color){let list=[];for(let i=0;i<64;i++){if(board[i]&&board[i].color===color){getMoves(board,i).forEach(x=>list.push(x));}}return list;}
-function chooseLearned(moves){let state=boardString();if(!memory[state])memory[state]={};let weighted=moves.map(m=>{let key=m[0]+"-"+m[1];return {move:m,w:(memory[state][key]||0)};});weighted.sort((a,b)=>b.w-a.w);if(weighted[0].w===0)return moves[Math.floor(Math.random()*moves.length)];return weighted[0].move;}
+function chooseLearned(moves){let state=boardString();if(!memory[state])memory[state]={};let weighted=moves.map(m=>{let key=m[0]+"-"+m[1];return {move:m,w:(memory[state][key]||0)};});weighted.sort((a,b)=>b.w-a.w);if(weighted[0].w===0) return moves[Math.floor(Math.random()*moves.length)]; return weighted[0].move;}
 
 // ===== LEARNING =====
 function endCheck(){
@@ -317,15 +260,15 @@ function checkEnd(){
     if(board.filter(p=>p&&p.color==="b").length===0) return "human";
     return null;
 }
-function learn(base){let bonus=moveHistory.length*0.1; moveHistory.forEach((h,i)=>{let {state,move}=h; let key=move.from+"-"+move.to; if(!memory[state])memory[state]={}; if(!memory[state][key])memory[state][key]=0; memory[state][key]+=base+bonus+i*0.05;}); moveHistory=[];}
+function learn(base){let bonus=moveHistory.length*0.1; moveHistory.forEach((h,i)=>{let {state,move}=h; let key=move.from+"-"+move.to; if(!memory[state]) memory[state]={}; if(!memory[state][key]) memory[state][key]=0; memory[state][key]+=base+bonus+i*0.05;}); moveHistory=[];}
 function saveMemory(){localStorage.setItem("ia_damas_memory",JSON.stringify(memory));}
 
 // ===== RESET =====
 function resetGame(){board=Array(64).fill(null); setupPieces(); playing=true; selected=null; moveHistory=[]; status.textContent="Sua vez"; render();}
 function setupPieces(){
     board.fill(null);
-    for(let r=0;r<3;r++) for(let c=0;c<8;c++) if((r+c)%2===1) board[r*8+c]=makePiece("b");
-    for(let r=5;r<8;r++) for(let c=0;c<8;c++) if((r+c)%2===1) board[r*8+c]=makePiece("r");
+    for(let r=0;r<3;r++){for(let c=0;c<8;c++){if((r+c)%2===1) board[r*8+c]=makePiece("b");}}
+    for(let r=5;r<8;r++){for(let c=0;c<8;c++){if((r+c)%2===1) board[r*8+c]=makePiece("r");}}
 }
 function resetMemory(){localStorage.removeItem("ia_damas_memory"); memory={}; alert("Memória da IA apagada!");}
 
