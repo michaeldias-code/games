@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Xadrez - Versão 2</title>
+<title>Xadrez</title>
 <style>
     body {
         display: flex;
@@ -12,13 +12,12 @@
         font-family: Arial, sans-serif;
     }
 
+    /* --- PC (permanece igual) --- */
     .board {
         display: grid;
         grid-template-columns: repeat(8, 80px);
         grid-template-rows: repeat(8, 80px);
         border: 4px solid #333;
-        position: relative;
-        touch-action: none; /* melhora toque no mobile */
     }
 
     .square {
@@ -42,14 +41,8 @@
         cursor: grabbing;
     }
 
-    /* ===========================================
-       MOBILE — aumentar tabuleiro e peças
-       =========================================== */
+    /* --- MOBILE (tamanho aumentado, mobilidade mantida) --- */
     @media (max-width: 600px) {
-        body {
-            margin-top: 20px;
-        }
-
         .board {
             width: 95vw;
             height: 95vw;
@@ -60,11 +53,11 @@
         .square {
             width: 100%;
             height: 100%;
-            font-size: 10vw;
+            font-size: 11vw; /* peças grandes agora */
         }
 
         .piece {
-            font-size: 10vw;
+            font-size: 11vw;
         }
     }
 </style>
@@ -101,21 +94,23 @@ for (let i = 0; i < 64; i++) {
         const piece = document.createElement("div");
         piece.textContent = initialPositions[i];
         piece.classList.add("piece");
+        piece.draggable = true;
         square.appendChild(piece);
     }
 
     board.appendChild(square);
 }
 
-// ------ SUPORTE PARA MOBILE TOUCH ------
+/* ============================================================
+   MOBILE — versão que FUNCIONAVA antes (mantida)
+   ============================================================ */
 let selectedPiece = null;
 
 board.addEventListener("touchstart", (e) => {
-    const target = e.target;
-
-    if (target.classList.contains("piece")) {
-        selectedPiece = target;
-        target.style.opacity = "0.5";
+    const t = e.target;
+    if (t.classList.contains("piece")) {
+        selectedPiece = t;
+        t.style.opacity = "0.5";
     }
 }, { passive: true });
 
@@ -141,7 +136,9 @@ board.addEventListener("touchend", (e) => {
     selectedPiece = null;
 });
 
-// ------ DESKTOP DRAG & DROP ------
+/* ============================================================
+   DESKTOP — drag & drop original (estava funcionando)
+   ============================================================ */
 let draggedPiece = null;
 
 document.addEventListener("dragstart", (e) => {
