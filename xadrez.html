@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Xadrez - Versão 2</title>
+<style>
+    body {
+        display: flex;
+        justify-content: center;
+        margin-top: 40px;
+        background: #e7e7e7;
+        font-family: Arial, sans-serif;
+    }
+
+    .board {
+        display: grid;
+        grid-template-columns: repeat(8, 80px);
+        grid-template-rows: repeat(8, 80px);
+        border: 4px solid #333;
+        position: relative;
+    }
+
+    .square {
+        width: 80px;
+        height: 80px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 52px;
+        user-select: none;
+    }
+
+    .white { background: #f0d9b5; }
+    .black { background: #b58863; }
+
+    .piece {
+        cursor: grab;
+    }
+
+    .piece:active {
+        cursor: grabbing;
+    }
+</style>
+</head>
+<body>
+
+<div class="board" id="board">
+    <!-- Tabuleiro + peças -->
+</div>
+
+<script>
+const board = document.getElementById("board");
+
+// Posições iniciais usando Unicode
+const initialPositions = [
+    "♜","♞","♝","♛","♚","♝","♞","♜",
+    "♟","♟","♟","♟","♟","♟","♟","♟",
+    "","","","","","","","",
+    "","","","","","","","",
+    "","","","","","","","",
+    "","","","","","","","",
+    "♙","♙","♙","♙","♙","♙","♙","♙",
+    "♖","♘","♗","♕","♔","♗","♘","♖"
+];
+
+// Cria casas e peças
+for (let i = 0; i < 64; i++) {
+    const square = document.createElement("div");
+    const row = Math.floor(i / 8);
+    const col = i % 8;
+
+    square.classList.add("square");
+    square.classList.add((row + col) % 2 === 0 ? "white" : "black");
+
+    if (initialPositions[i] !== "") {
+        const piece = document.createElement("div");
+        piece.textContent = initialPositions[i];
+        piece.classList.add("piece");
+        piece.draggable = true;
+        square.appendChild(piece);
+    }
+
+    board.appendChild(square);
+}
+
+
+// --- DRAG & DROP ---
+let draggedPiece = null;
+
+document.addEventListener("dragstart", (e) => {
+    if (e.target.classList.contains("piece")) {
+        draggedPiece = e.target;
+    }
+});
+
+document.addEventListener("dragover", (e) => {
+    e.preventDefault(); // Necessário para permitir o drop
+});
+
+document.addEventListener("drop", (e) => {
+    e.preventDefault();
+    
+    const square = e.target.classList.contains("square")
+        ? e.target
+        : e.target.parentElement.classList.contains("square")
+            ? e.target.parentElement
+            : null;
+
+    if (square && draggedPiece) {
+        square.innerHTML = ""; // remove peça anterior se houver
+        square.appendChild(draggedPiece);
+    }
+
+    draggedPiece = null;
+});
+</script>
+
+</body>
+</html>
