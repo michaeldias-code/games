@@ -34,19 +34,17 @@
     .black { background: #b58863; }
 
     .piece {
-        cursor: grab;
+        cursor: pointer;
     }
 
-    .piece:active {
-        cursor: grabbing;
+    .selected {
+        outline: 3px solid yellow;
     }
 </style>
 </head>
 <body>
 
-<div class="board" id="board">
-    <!-- Tabuleiro + peças -->
-</div>
+<div class="board" id="board"></div>
 
 <script>
 const board = document.getElementById("board");
@@ -63,6 +61,8 @@ const initialPositions = [
     "♖","♘","♗","♕","♔","♗","♘","♖"
 ];
 
+let selectedPiece = null;
+
 // Cria casas e peças
 for (let i = 0; i < 64; i++) {
     const square = document.createElement("div");
@@ -71,47 +71,39 @@ for (let i = 0; i < 64; i++) {
 
     square.classList.add("square");
     square.classList.add((row + col) % 2 === 0 ? "white" : "black");
+    square.dataset.index = i;
 
     if (initialPositions[i] !== "") {
         const piece = document.createElement("div");
         piece.textContent = initialPositions[i];
         piece.classList.add("piece");
-        piece.draggable = true;
         square.appendChild(piece);
     }
 
     board.appendChild(square);
 }
 
+// Função de clique / toque
+board.addEventListener("click", (e) => {
+    const square = e.target.classList.contains("square") ? e.target : e.target.parentElement;
+    if (!square || !square.classList.contains("square")) return;
 
-// --- DRAG & DROP ---
-let draggedPiece = null;
+    const piece = square.querySelector(".piece");
 
-document.addEventListener("dragstart", (e) => {
-    if (e.target.classList.contains("piece")) {
-        draggedPiece = e.target;
+    if (selectedPiece) {
+        // Move a peça selecionada
+        if (piece) {
+            // troca apenas se quiser implementar captura
+            square.innerHTML = "";
+        }
+        square.appendChild(selectedPiece);
+        selectedPiece.classList.remove("selected");
+        selectedPiece = null;
+    } else if (piece) {
+        // Seleciona a peça
+        selectedPiece = piece;
+        selectedPiece.classList.add("selected");
     }
-});
-
-document.addEventListener("dragover", (e) => {
-    e.preventDefault(); // Necessário para permitir o drop
-});
-
-document.addEventListener("drop", (e) => {
-    e.preventDefault();
-    
-    const square = e.target.classList.contains("square")
-        ? e.target
-        : e.target.parentElement.classList.contains("square")
-            ? e.target.parentElement
-            : null;
-
-    if (square && draggedPiece) {
-        square.innerHTML = ""; // remove peça anterior se houver
-        square.appendChild(draggedPiece);
-    }
-
-    draggedPiece = null;
 });
 </script>
 
