@@ -2,63 +2,139 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Teste Board Responsivo</title>
+<title>Xadrez Responsivo - Clique nas Peças</title>
 <style>
 body {
-    margin: 0;
     display: flex;
     justify-content: center;
-    align-items: center;
-    height: 100vh;
+    align-items: flex-start;
+    min-height: 100vh;
+    margin: 20px 0;
     background: #e7e7e7;
+    font-family: Arial, sans-serif;
+    flex-direction: column;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
 }
 
 .board {
     display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    grid-template-rows: repeat(8, 1fr);
-    width: 80vmin; /* usa 80% da menor dimensão da tela */
-    height: 80vmin;
+    grid-template-columns: repeat(8, 80px);
+    grid-template-rows: repeat(8, 80px);
     border: 4px solid #333;
 }
 
 .square {
-    width: 100%;
-    height: 100%;
+    width: 80px;
+    height: 80px;
     display: flex;
     justify-content: center;
     align-items: center;
+    font-size: 52px;
+    user-select: none;
 }
 
 .white { background: #f0d9b5; }
 .black { background: #b58863; }
 
-/* Ajuste extra para celular bem pequeno */
+.piece {
+    cursor: pointer;
+    font-size: 80%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.highlight {
+    outline: 3px solid yellow;
+    transition: outline 0.3s;
+}
+
+/* ===== Responsivo ===== */
 @media (max-width: 600px) {
     .board {
-        width: 95vw;
-        height: 95vw;
+        width: 90vw;
+        height: 90vw;
+        grid-template-columns: repeat(8, 1fr);
+        grid-template-rows: repeat(8, 1fr);
     }
+    .square { font-size: 10vw; }
 }
 </style>
 </head>
 <body>
 
-<div class="board" id="board">
-    <!-- Casas vão aqui -->
-</div>
+<h1>Xadrez Responsivo</h1>
+<div class="board" id="board"></div>
+<div style="text-align:center;margin-top:10px;">@DM</div>
 
 <script>
-const board = document.getElementById("board");
+const boardDiv = document.getElementById("board");
+let selectedPiece = null;
 
-// Cria as 64 casas vazias
-for (let i = 0; i < 64; i++) {
+// Unicode das peças
+const initialPositions = [
+    "♜","♞","♝","♛","♚","♝","♞","♜",
+    "♟","♟","♟","♟","♟","♟","♟","♟",
+    "","","","","","","","",
+    "","","","","","","","",
+    "","","","","","","","",
+    "","","","","","","","",
+    "♙","♙","♙","♙","♙","♙","♙","♙",
+    "♖","♘","♗","♕","♔","♗","♘","♖"
+];
+
+// Cria squares e peças
+const squares = [];
+for(let i=0;i<64;i++){
     const square = document.createElement("div");
-    const row = Math.floor(i / 8);
-    const col = i % 8;
     square.classList.add("square");
-    square.classList.add((row + col) % 2 === 0 ? "white" : "black");
-    board.appendChild(square);
+    const row = Math.floor(i/8);
+    const col = i%8;
+    square.classList.add((row+col)%2===0 ? "white" : "black");
+    square.dataset.index = i;
+
+    if(initialPositions[i]!==""){
+        const piece = document.createElement("div");
+        piece.textContent = initialPositions[i];
+        piece.classList.add("piece");
+        square.appendChild(piece);
+    }
+
+    square.addEventListener("click",()=>onSquareClick(i));
+    boardDiv.appendChild(square);
+    squares.push(square);
+}
+
+// Função de clique
+function onSquareClick(i){
+    const square = squares[i];
+    const piece = square.querySelector(".piece");
+
+    // Se já tem peça selecionada e clicou em destino
+    if(selectedPiece){
+        if(selectedPiece.parentElement !== square){ // Não clicar na mesma casa
+            square.innerHTML = "";
+            square.appendChild(selectedPiece);
+        }
+        clearHighlights();
+        selectedPiece = null;
+        return;
+    }
+
+    // Se clicou numa peça
+    if(piece){
+        selectedPiece = piece;
+        square.classList.add("highlight");
+    }
+}
+
+// Limpa highlights
+function clearHighlights(){
+    squares.forEach(sq=>sq.classList.remove("highlight"));
 }
 </script>
 
