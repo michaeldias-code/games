@@ -36,23 +36,24 @@ h1 {
 #info { margin-top: 15px; font-size: 16px; }
 .footer { margin-top: 20px; font-size: 12px; color: #555; }
 
-/* CELULAR */
+/* MOBILE */
 @media (max-width: 600px) {
     .board {
-        width: 95vw;          /* largura quase total da tela */
-        aspect-ratio: 1/1;    /* garante quadrado */
+        width: 95vw;
+        height: 95vw;
         grid-template-columns: repeat(8, 1fr);
         grid-template-rows: repeat(8, 1fr);
+        border-width: 3px;
     }
     .square {
-        font-size: calc(95vw / 8 * 0.9); /* ajusta o tamanho da peça proporcionalmente */
+        font-size: calc(95vw / 8 * 0.9);
     }
 }
 </style>
 </head>
 <body>
 
-<h1>Xadrez - Responsivo</h1>
+<h1>*Xadrez - Responsivo*</h1>
 <div id="board"></div>
 <div id="signature">@DM***</div>
 
@@ -125,6 +126,7 @@ window.addEventListener("resize", () => {
 
 </body>
 </html>
+
 
 
 
