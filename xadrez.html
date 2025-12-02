@@ -27,7 +27,7 @@ h1 {
     align-items: center;
     font-size: 52px;
     user-select: none;
-    aspect-ratio: 1/1; /* garante quadrado */
+    aspect-ratio: 1/1;
     cursor: pointer;
 }
 .white { background: #f0d9b5; }
@@ -39,22 +39,20 @@ h1 {
 /* CELULAR */
 @media (max-width: 600px) {
     .board {
-        width: 95vw;
-        max-width: 95vw;
-        height: auto;
-        display: grid;
+        width: 95vw;          /* largura quase total da tela */
+        aspect-ratio: 1/1;    /* garante quadrado */
         grid-template-columns: repeat(8, 1fr);
         grid-template-rows: repeat(8, 1fr);
     }
     .square {
-        font-size: calc(95vw / 8 * 0.9); /* ajusta tamanho da peça */
+        font-size: calc(95vw / 8 * 0.9); /* ajusta o tamanho da peça proporcionalmente */
     }
 }
 </style>
 </head>
 <body>
 
-<h1>*Xadrez - Responsivo*</h1>
+<h1>Xadrez - Responsivo</h1>
 <div id="board"></div>
 <div id="signature">@DM***</div>
 
@@ -127,5 +125,6 @@ window.addEventListener("resize", () => {
 
 </body>
 </html>
+
 
 
