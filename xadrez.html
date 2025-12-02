@@ -1,70 +1,66 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Xadrez Responsivo</title>
+<title>Xadrez - Versão 3</title>
 <style>
 body {
     display: flex;
+    flex-direction: column;
     justify-content: center;
+    align-items: center;
     margin-top: 20px;
     background: #e7e7e7;
     font-family: Arial, sans-serif;
-    flex-direction: column;
-    align-items: center;
-}
-h1 {
-    margin-bottom: 20px;
-    font-weight: 300;
 }
 
-/* Tabuleiro */
 .board {
     display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    grid-template-rows: repeat(8, 1fr);
-    max-width: 600px;
-    max-height: 600px;
-    width: 90vw;
-    height: 90vw;
+    grid-template-columns: repeat(8, 80px);
+    grid-template-rows: repeat(8, 80px);
     border: 4px solid #333;
 }
 
-/* Casas */
 .square {
-    width: 100%;
-    height: 100%;
+    width: 80px;
+    height: 80px;
     display: flex;
     justify-content: center;
     align-items: center;
+    font-size: 52px;
     user-select: none;
 }
+
 .white { background: #f0d9b5; }
 .black { background: #b58863; }
 
-/* Peças */
 .piece {
     cursor: pointer;
-    font-size: min(8vw, 60px); /* cresce no celular, limitado no desktop */
-    user-select: none;
 }
 
-/* Marca */
-#footer {
-    margin-top: 20px;
-    font-size: 14px;
-    color: #555;
+/* CELULAR */
+@media (max-width: 600px) {
+    .board {
+        width: 90vw;
+        height: 90vw;
+        grid-template-columns: repeat(8, 1fr);
+        grid-template-rows: repeat(8, 1fr);
+    }
+    .square {
+        width: 100%;
+        height: 100%;
+        font-size: 11vw; /* ajuste fino para peças maiores */
+    }
 }
 </style>
 </head>
 <body>
 
-<h1>Xadrez</h1>
 <div class="board" id="board"></div>
-<div id="footer">@DM</div>
+<div style="margin-top:10px;font-size:14px;color:#555;">@DM**</div>
 
 <script>
-const boardDiv = document.getElementById("board");
+const board = document.getElementById("board");
 
 // Posições iniciais usando Unicode
 const initialPositions = [
@@ -78,14 +74,13 @@ const initialPositions = [
     "♖","♘","♗","♕","♔","♗","♘","♖"
 ];
 
-let selectedPiece = null;
-
 // Cria casas e peças
 for (let i = 0; i < 64; i++) {
     const square = document.createElement("div");
-    square.classList.add("square");
     const row = Math.floor(i / 8);
     const col = i % 8;
+
+    square.classList.add("square");
     square.classList.add((row + col) % 2 === 0 ? "white" : "black");
     square.dataset.index = i;
 
@@ -96,34 +91,23 @@ for (let i = 0; i < 64; i++) {
         square.appendChild(piece);
     }
 
-    square.addEventListener("click", () => handleClick(i));
-    boardDiv.appendChild(square);
+    board.appendChild(square);
 }
 
-// Clique na peça e clique no destino
-function handleClick(i) {
-    const square = boardDiv.children[i];
-    const pieceDiv = square.querySelector(".piece");
+// --- CLIQUE NO DESTINO ---
+let selectedPiece = null;
 
-    if (selectedPiece) {
-        // Move peça para a casa clicada
-        if (!pieceDiv || pieceDiv !== selectedPiece) {
-            square.innerHTML = "";
-            square.appendChild(selectedPiece);
-            selectedPiece = null;
-        } else {
-            // Clicou na mesma peça, desmarca
-            selectedPiece.style.outline = "";
-            selectedPiece = null;
-        }
-    } else {
-        // Seleciona peça se houver
-        if (pieceDiv) {
-            selectedPiece = pieceDiv;
-            selectedPiece.style.outline = "3px solid yellow";
-        }
+board.addEventListener("click", (e) => {
+    const target = e.target;
+    if (target.classList.contains("piece")) {
+        selectedPiece = target;
+    } else if (target.classList.contains("square") && selectedPiece) {
+        // Move a peça para a casa clicada
+        if (target.firstChild) target.removeChild(target.firstChild);
+        target.appendChild(selectedPiece);
+        selectedPiece = null;
     }
-}
+});
 </script>
 
 </body>
