@@ -9,7 +9,6 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
     font-family: Arial, sans-serif;
     background: #e7e7e7;
     padding: 20px;
@@ -20,7 +19,6 @@ h1 {
 #board {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
-    grid-template-rows: repeat(8, 1fr);
     width: 90vw;
     max-width: 480px;
     aspect-ratio: 1 / 1;
@@ -32,7 +30,6 @@ h1 {
     justify-content: center;
     align-items: center;
     font-size: calc(90vw / 8 * 0.9);
-    user-select: none;
     box-sizing: border-box;
 }
 .white { background: #f0d9b5; }
@@ -56,14 +53,13 @@ h1 {
 
 <h1>Xadrez - Responsivo</h1>
 <div id="board"></div>
-<div id="signature">@DM</div>
+<div id="signature">@DM***</div>
 
 <script>
 const boardDiv = document.getElementById("board");
 let board = Array(64).fill("");
 let selected = null;
 
-// Peças iniciais
 const initial = [
     "♜","♞","♝","♛","♚","♝","♞","♜",
     "♟","♟","♟","♟","♟","♟","♟","♟",
@@ -75,7 +71,7 @@ const initial = [
     "♖","♘","♗","♕","♔","♗","♘","♖"
 ];
 
-// Criar casas e renderizar peças
+// Renderização do board
 function renderBoard() {
     boardDiv.innerHTML = "";
     for (let i = 0; i < 64; i++) {
@@ -85,29 +81,27 @@ function renderBoard() {
         square.className = "square " + ((row + col) % 2 === 0 ? "white" : "black");
         square.dataset.index = i;
 
-        if (board[i]) {
-            const piece = document.createElement("div");
-            piece.className = "piece";
-            piece.textContent = board[i];
-            square.appendChild(piece);
-        }
+        // Cria div vazia mesmo se não houver peça
+        const piece = document.createElement("div");
+        piece.className = "piece";
+        piece.textContent = board[i];
+        square.appendChild(piece);
 
         square.onclick = () => clickSquare(i);
         boardDiv.appendChild(square);
     }
+    highlightSelected();
 }
 
 function clickSquare(i) {
     if (selected === null && board[i]) {
         selected = i;
-        highlightSelected();
     } else if (selected !== null) {
-        // mover peça
         board[i] = board[selected];
         board[selected] = "";
         selected = null;
-        renderBoard();
     }
+    renderBoard();
 }
 
 function highlightSelected() {
@@ -116,11 +110,11 @@ function highlightSelected() {
     });
 }
 
-// Inicializar
+// Inicializa
 board = [...initial];
 renderBoard();
 
-// Responsividade ao redimensionar
+// Responsivo ao redimensionar
 window.addEventListener("resize", () => {
     document.querySelectorAll(".square").forEach(sq => {
         sq.style.fontSize = `calc(${boardDiv.clientWidth} / 8 * 0.9)`;
