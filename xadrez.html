@@ -7,57 +7,64 @@
 body {
     display: flex;
     justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    min-height: 100vh;
+    margin-top: 20px;
     background: #e7e7e7;
     font-family: Arial, sans-serif;
-    margin: 0;
+    flex-direction: column;
+    align-items: center;
 }
+h1 {
+    margin-bottom: 20px;
+    font-weight: 300;
+}
+
+/* Tabuleiro */
 .board {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
     grid-template-rows: repeat(8, 1fr);
-    max-width: 600px;  /* desktop */
+    max-width: 600px;
     max-height: 600px;
-    width: 90vw;       /* mobile */
+    width: 90vw;
     height: 90vw;
     border: 4px solid #333;
 }
+
+/* Casas */
 .square {
+    width: 100%;
+    height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 5vw;  /* cresce proporcionalmente */
     user-select: none;
 }
 .white { background: #f0d9b5; }
 .black { background: #b58863; }
+
+/* Peças */
 .piece {
     cursor: pointer;
-    font-size: inherit;
+    font-size: min(8vw, 60px); /* cresce no celular, limitado no desktop */
+    user-select: none;
 }
-.status {
-    margin-top: 15px;
-    font-size: 1.2rem;
-}
-.footer {
-    margin-top: 10px;
-    font-size: 0.9rem;
+
+/* Marca */
+#footer {
+    margin-top: 20px;
+    font-size: 14px;
     color: #555;
 }
 </style>
 </head>
 <body>
 
-<h1>Xadrez Responsivo</h1>
+<h1>Xadrez</h1>
 <div class="board" id="board"></div>
-<div class="status" id="status">Clique na peça e depois na casa desejada</div>
-<div class="footer">@DM*</div>
+<div id="footer">@DM</div>
 
 <script>
 const boardDiv = document.getElementById("board");
-const statusDiv = document.getElementById("status");
 
 // Posições iniciais usando Unicode
 const initialPositions = [
@@ -71,10 +78,9 @@ const initialPositions = [
     "♖","♘","♗","♕","♔","♗","♘","♖"
 ];
 
-let board = Array(64).fill(null);
-let selected = null;
+let selectedPiece = null;
 
-// Cria tabuleiro
+// Cria casas e peças
 for (let i = 0; i < 64; i++) {
     const square = document.createElement("div");
     square.classList.add("square");
@@ -82,42 +88,40 @@ for (let i = 0; i < 64; i++) {
     const col = i % 8;
     square.classList.add((row + col) % 2 === 0 ? "white" : "black");
     square.dataset.index = i;
-    square.addEventListener("click", () => squareClick(i));
-    boardDiv.appendChild(square);
 
-    // Adiciona peça
     if (initialPositions[i] !== "") {
         const piece = document.createElement("div");
         piece.textContent = initialPositions[i];
         piece.classList.add("piece");
-        board[i] = piece.textContent;
         square.appendChild(piece);
     }
+
+    square.addEventListener("click", () => handleClick(i));
+    boardDiv.appendChild(square);
 }
 
-function render() {
-    for (let i = 0; i < 64; i++) {
-        const square = boardDiv.children[i];
-        square.innerHTML = "";
-        if (board[i]) {
-            const piece = document.createElement("div");
-            piece.textContent = board[i];
-            piece.classList.add("piece");
-            square.appendChild(piece);
+// Clique na peça e clique no destino
+function handleClick(i) {
+    const square = boardDiv.children[i];
+    const pieceDiv = square.querySelector(".piece");
+
+    if (selectedPiece) {
+        // Move peça para a casa clicada
+        if (!pieceDiv || pieceDiv !== selectedPiece) {
+            square.innerHTML = "";
+            square.appendChild(selectedPiece);
+            selectedPiece = null;
+        } else {
+            // Clicou na mesma peça, desmarca
+            selectedPiece.style.outline = "";
+            selectedPiece = null;
         }
-    }
-}
-
-// Clique na peça ou na casa
-function squareClick(i) {
-    if (selected === null) {
-        if (board[i]) selected = i; // seleciona a peça
     } else {
-        // move peça
-        board[i] = board[selected];
-        board[selected] = null;
-        selected = null;
-        render();
+        // Seleciona peça se houver
+        if (pieceDiv) {
+            selectedPiece = pieceDiv;
+            selectedPiece.style.outline = "3px solid yellow";
+        }
     }
 }
 </script>
