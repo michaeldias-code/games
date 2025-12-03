@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Xadrez Web com IA</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+    <h1>Xadrez Web com IA (MVC)</h1>
+</header>
+
+<main>
+
+    <!-- HUD -->
+    <section id="hud">
+        <div id="turnDisplay">Vez: —</div>
+        <div id="statusDisplay">Status: —</div>
+
+        <button id="btnReset">Reiniciar</button>
+         <!-- <button id="btnIA">IA Jogar</button> -->
+    </section>
+
+    <!-- Tabuleiro -->
+    <section id="boardContainer">
+        <div id="board"></div>
+    </section>
+
+</main>
+
+<footer>
+    <p>Arquitetura MVC — View Final</p>
+</footer>
+
+<!-- 
+=====================================================
+    A VIEW cria as 64 casas do tabuleiro.
+    Sem lógica. Sem model. Sem controller.
+=====================================================
+-->
+<script>
+const board = document.getElementById("board");
+
+for (let i = 0; i < 64; i++) {
+    const sq = document.createElement("div");
+    const row = Math.floor(i / 8);
+    const col = i % 8;
+
+    sq.classList.add("square", (row + col) % 2 === 0 ? "white" : "black");
+    sq.dataset.index = i;
+
+    board.appendChild(sq);
+}
+</script>
+
+<script src="model.js"></script>
+<script src="controller.js"></script>
+<script>
+    const model = new ModelChess();
+    const controller = new ChessController(model);
+</script>
+
+</body>
+</html>
