@@ -134,3 +134,20 @@ body {
 #help-btn:hover {
     background-color: #ffd633;
 }
+
+.tooltip {
+    position: absolute;
+    background-color: #333;
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 100;
+}
+.tooltip.show {
+    opacity: 1;
+}
+
