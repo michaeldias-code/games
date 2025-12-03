@@ -274,8 +274,18 @@ function makeMove(move, promotionChosen=null){
 ============================================================ */
 function addLog(msg){
     const logDiv = document.getElementById("log");
-    logDiv.innerHTML += msg+"<br>";
-    logDiv.scrollTop = logDiv.scrollHeight;
+    
+	//logDiv.innerHTML += msg+"<br>";
+    
+	 logDiv.innerHTML = msg + "<br>" + logDiv.innerHTML;
+
+    // Limite de 30 mensagens
+    const lines = logDiv.innerHTML.split("<br>");
+    if (lines.length > 30) {
+        logDiv.innerHTML = lines.slice(0, 30).join("<br>");
+    }
+	
+	//logDiv.scrollTop = logDiv.scrollHeight;
 }
 
 /* ============================================================
