@@ -258,27 +258,28 @@ function render() {
             }
 
             // Tooltip de dicas
-            const moves = legalMoves({ r, c, p });
-            if (moves.length > 0 && isPlayerPiece(p)) {
+            if (isPlayerPiece(p)) {
+                const moves = legalMoves({ r, c, p });
                 let tip = "";
-                moves.forEach((mv) => {
+
+                for (let mv of moves) {
                     const [tr, tc] = mv.to;
                     const target = board[tr][tc];
-
-                    // Promoção possível
                     const base = p.toUpperCase();
-                    const forward = -1; // jogador move para cima
-                    let promotionRow = (base === "P" || base === "L") ? 0 :
-                                       (base === "N") ? 0 : -1; // apenas peças que podem promover
-                    if ((base === "P" || base === "L" || base === "N" || base === "S") && (tr === 0)) {
+
+                    // Checa promoção
+                    if ((base === "P" || base === "L" || base === "N" || base === "S") && tr === 0) {
                         tip = "Promoção disponível!";
-                    } else if (!tip && target !== "." && isAIPiece(target)) {
+                        break; // prioriza promoção
+                    }
+
+                    // Checa captura apenas se tip ainda vazio
+                    if (!tip && target !== "." && isAIPiece(target)) {
                         tip = "Você pode capturar esta peça!";
                     }
-                });
-                if (tip) {
-                    cell.title = tip;
                 }
+
+                if (tip) cell.title = tip;
             }
 
             cell.onclick = () => handleClick(r, c);
@@ -332,4 +333,5 @@ function aiPlay(){
    INIT
 ============================================================ */
 render();
+
 
