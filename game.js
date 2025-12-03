@@ -233,38 +233,58 @@ function renderCaptures(){
     for(const p of capturedPlayer) pArea.innerHTML+=`<img class="piece" src="pieces/${pieceImageFromBase(p)}">`;
     for(const p of capturedAI) aArea.innerHTML+=`<img class="piece" src="pieces/${pieceImageFromBase(p)}">`;
 }
-function render(){
+/* ============================================================
+   RENDER COM DICAS
+============================================================ */
+function render() {
     const boardDiv = document.getElementById("board");
     boardDiv.innerHTML = "";
-    for(let r=0;r<9;r++){
-        for(let c=0;c<9;c++){
+
+    for (let r = 0; r < 9; r++) {
+        for (let c = 0; c < 9; c++) {
             const cell = document.createElement("div");
-            cell.className="cell";
-            cell.dataset.r=r;
-            cell.dataset.c=c;
+            cell.className = "cell";
+            cell.dataset.r = r;
+            cell.dataset.c = c;
+
             const p = board[r][c];
-            if(p!=="."){
+
+            if (p !== ".") {
                 const img = document.createElement("img");
-                img.src="pieces/"+p.toUpperCase()+".svg";
-                img.style.width="60px";
-                img.style.height="60px";
+                img.src = "pieces/" + p.toUpperCase() + ".svg";
+                img.style.width = "60px";
+                img.style.height = "60px";
                 cell.appendChild(img);
             }
-            cell.onclick=()=>handleClick(r,c);
+
+            // Tooltip de dicas
+            const moves = legalMoves({ r, c, p });
+            if (moves.length > 0 && isPlayerPiece(p)) {
+                let tip = "";
+                moves.forEach((mv) => {
+                    const [tr, tc] = mv.to;
+                    const target = board[tr][tc];
+
+                    // Promoção possível
+                    const base = p.toUpperCase();
+                    const forward = -1; // jogador move para cima
+                    let promotionRow = (base === "P" || base === "L") ? 0 :
+                                       (base === "N") ? 0 : -1; // apenas peças que podem promover
+                    if ((base === "P" || base === "L" || base === "N" || base === "S") && (tr === 0)) {
+                        tip = "Promoção disponível!";
+                    } else if (!tip && target !== "." && isAIPiece(target)) {
+                        tip = "Você pode capturar esta peça!";
+                    }
+                });
+                if (tip) {
+                    cell.title = tip;
+                }
+            }
+
+            cell.onclick = () => handleClick(r, c);
             boardDiv.appendChild(cell);
         }
     }
-
-    // adiciona hover educativo
-    document.querySelectorAll(".cell").forEach(cell=>{
-        const r = parseInt(cell.dataset.r);
-        const c = parseInt(cell.dataset.c);
-        const p = board[r][c];
-        if(isPlayerPiece(p)){
-            cell.onmouseenter = ()=>highlightMovesWithTips(r,c,p);
-            cell.onmouseleave = hideTooltip;
-        }
-    });
 
     renderCaptures();
 }
@@ -312,3 +332,4 @@ function aiPlay(){
    INIT
 ============================================================ */
 render();
+
