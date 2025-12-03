@@ -1,11 +1,8 @@
 // =======================================================
-//                   MODEL (XADREZ FINAL)
-//      Movimentos legais + Check + Checkmate + IA heurística
+//                   MODEL XADREZ COMPLETO
 // =======================================================
-
 class ModelChess {
     constructor() {
-        this.board = [];
         this.reset();
 
         this.turn = "Brancas";
@@ -15,8 +12,9 @@ class ModelChess {
         this.qTable = JSON.parse(localStorage.getItem("chessQTable") || "{}");
         this.learningRate = 0.2;
         this.discount = 0.9;
+        this.explorationRate = 0.3;
 
-        this.lastAIMove = null;
+        this.pieceValues = { "♙": 1, "♟": 1, "♘": 3, "♞": 3, "♗": 3, "♝": 3, "♖": 5, "♜": 5, "♕": 9, "♛": 9, "♔": 1000, "♚": 1000 };
     }
 
     reset() {
@@ -30,7 +28,6 @@ class ModelChess {
             "♙","♙","♙","♙","♙","♙","♙","♙",
             "♖","♘","♗","♕","♔","♗","♘","♖"
         ];
-
         this.turn = "Brancas";
         this.selected = null;
         this.status = "Em jogo";
@@ -45,47 +42,25 @@ class ModelChess {
         };
     }
 
-    // =======================================================
-    //                      PEÇAS
-    // =======================================================
-
     isWhite(piece) {
         if (!piece) return null;
-        const white = "♙♖♘♗♕♔";
-        const black = "♟♜♞♝♛♚";
-        if (white.includes(piece)) return true;
-        if (black.includes(piece)) return false;
+        const whitePieces = "♙♖♘♗♕♔";
+        const blackPieces = "♟♜♞♝♛♚";
+        if (whitePieces.includes(piece)) return true;
+        if (blackPieces.includes(piece)) return false;
         return null;
     }
-
-    pieceValue(piece) {
-        if (!piece) return 0;
-        switch (piece) {
-            case "♙": case "♟": return 1;
-            case "♘": case "♞": return 3;
-            case "♗": case "♝": return 3;
-            case "♖": case "♜": return 5;
-            case "♕": case "♛": return 9;
-            case "♔": case "♚": return 100;
-        }
-        return 0;
-    }
-
-    // =======================================================
-    //                   MOVIMENTOS
-    // =======================================================
 
     isValidMove(from, to) {
         const piece = this.board[from];
         const target = this.board[to];
-
         if (!piece) return false;
+
         if (target && this.isWhite(piece) === this.isWhite(target)) return false;
 
         const rowF = Math.floor(from / 8), colF = from % 8;
         const rowT = Math.floor(to / 8), colT = to % 8;
-        const dRow = rowT - rowF;
-        const dCol = colT - colF;
+        const dRow = rowT - rowF, dCol = colT - colF;
 
         switch (piece) {
             case "♙": return this.pawnMove(dRow, dCol, from, to, true);
@@ -108,22 +83,18 @@ class ModelChess {
             if (dRow === dir && !target) return true;
             if (dRow === 2*dir && Math.floor(from/8) === startRow && !target && !this.board[from + dir*8]) return true;
         }
-
         if (Math.abs(dCol) === 1 && dRow === dir && target && this.isWhite(target) !== isWhite) return true;
-
         return false;
     }
 
     straightMove(from, to) {
         const rowF = Math.floor(from / 8), colF = from % 8;
         const rowT = Math.floor(to / 8), colT = to % 8;
-
         if (rowF !== rowT && colF !== colT) return false;
 
         const dRow = rowT - rowF ? Math.sign(rowT - rowF) : 0;
         const dCol = colT - colF ? Math.sign(colT - colF) : 0;
         let r = rowF + dRow, c = colF + dCol;
-
         while (r !== rowT || c !== colT) {
             if (this.board[r*8 + c]) return false;
             r += dRow; c += dCol;
@@ -134,13 +105,11 @@ class ModelChess {
     diagonalMove(from, to) {
         const rowF = Math.floor(from / 8), colF = from % 8;
         const rowT = Math.floor(to / 8), colT = to % 8;
-
         if (Math.abs(rowT-rowF) !== Math.abs(colT-colF)) return false;
 
         const dRow = Math.sign(rowT - rowF);
         const dCol = Math.sign(colT - colF);
         let r = rowF + dRow, c = colF + dCol;
-
         while (r !== rowT && c !== colT) {
             if (this.board[r*8 + c]) return false;
             r += dRow; c += dCol;
@@ -160,11 +129,6 @@ class ModelChess {
     movePiece(from, to) {
         this.board[to] = this.board[from];
         this.board[from] = "";
-
-        // PROMOÇÃO automática
-        if (this.board[to] === "♟" && to >= 56) this.board[to] = "♛";
-        if (this.board[to] === "♙" && to <= 7)  this.board[to] = "♕";
-
         this.selected = null;
     }
 
@@ -172,179 +136,96 @@ class ModelChess {
         this.turn = this.turn === "Brancas" ? "Pretas" : "Brancas";
     }
 
-    // =======================================================
-    //                 CHECK E CHECKMATE
-    // =======================================================
+    isCheck(whiteTurn) {
+        const king = whiteTurn ? "♔" : "♚";
+        const kingPos = this.board.indexOf(king);
+        if (kingPos === -1) return false;
 
-    findKing(color) {
-        const white = color === "Brancas";
-        for (let i = 0; i < 64; i++) {
-            const p = this.board[i];
-            if (!p) continue;
-            if (this.isWhite(p) === white && (p === "♔" || p === "♚")) return i;
-        }
-        return -1;
+        const enemyColor = whiteTurn ? "Pretas" : "Brancas";
+        return this.getAllPossibleMoves(enemyColor).some(m => m.to === kingPos);
     }
 
-    isSquareAttacked(square, attackingColor) {
-        const enemyIsWhite = attackingColor === "Brancas";
-
-        for (let i = 0; i < 64; i++) {
-            const p = this.board[i];
-            if (!p) continue;
-            if (this.isWhite(p) !== enemyIsWhite) continue;
-
-            if (this.isValidMove(i, square)) return true;
-        }
-
-        return false;
+    isCheckmate() {
+        const moves = this.getAllPossibleMoves(this.turn);
+        return moves.length === 0 && this.isCheck(this.turn === "Brancas");
     }
 
-    isCheck(color = this.turn) {
-        const kingPos = this.findKing(color);
-        const enemyColor = color === "Brancas" ? "Pretas" : "Brancas";
-        return this.isSquareAttacked(kingPos, enemyColor);
-    }
-
-    isCheckmate(color = this.turn) {
-        if (!this.isCheck(color)) return false;
-
-        const moves = this.getAllPossibleMoves(color);
-        for (const mv of moves) {
-            const backup = [...this.board];
-            this.board[mv.to] = this.board[mv.from];
-            this.board[mv.from] = "";
-
-            const check = this.isCheck(color);
-
-            this.board = backup;
-
-            if (!check) return false;
-        }
-
-        return true;
-    }
-
-    // =======================================================
-    //          LISTA TODAS AS JOGADAS POSSÍVEIS
-    // =======================================================
-
-    getAllPossibleMoves(color = this.turn) {
+    getAllPossibleMoves(turn = this.turn) {
         const moves = [];
-        const wantWhite = color === "Brancas";
-
         for (let i = 0; i < 64; i++) {
             const piece = this.board[i];
             if (!piece) continue;
-            if (this.isWhite(piece) !== wantWhite) continue;
+            if ((turn === "Brancas" && this.isWhite(piece)) || (turn === "Pretas" && !this.isWhite(piece))) {
+                for (let j = 0; j < 64; j++) {
+                    if (this.isValidMove(i, j)) {
+                        // Simula o movimento para evitar movimentos que deixam rei em check
+                        const backupFrom = this.board[i];
+                        const backupTo = this.board[j];
+                        this.board[j] = this.board[i];
+                        this.board[i] = "";
+                        const stillSafe = !this.isCheck(turn === "Brancas");
+                        this.board[i] = backupFrom;
+                        this.board[j] = backupTo;
 
-            for (let j = 0; j < 64; j++) {
-                if (this.isValidMove(i, j)) {
-                    moves.push({from: i, to: j});
+                        if (stillSafe) moves.push({from: i, to: j});
+                    }
                 }
             }
         }
         return moves;
     }
 
-    // =======================================================
-    //                     IA HEURÍSTICA
-    // =======================================================
+    pieceValue(piece) {
+        return this.pieceValues[piece] || 0;
+    }
 
     IAMove() {
         if (this.status !== "Em jogo") return;
 
-        const moves = this.getAllPossibleMoves(this.turn);
+        const moves = this.getAllPossibleMoves();
         if (!moves.length) {
-            if (this.isCheck()) this.status = "Checkmate";
+            if (this.isCheck(this.turn === "Brancas")) {
+                this.status = "Checkmate";
+            } else {
+                this.status = "Empate";
+            }
             return;
         }
-
-        const enemyColor = this.turn === "Brancas" ? "Pretas" : "Brancas";
 
         let bestMove = null;
         let bestScore = -Infinity;
 
-        for (const mv of moves) {
-            const from = mv.from;
-            const to = mv.to;
+        for (const m of moves) {
+            const target = this.board[m.to];
+            const fromPiece = this.board[m.from];
 
-            const piece = this.board[from];
-            const target = this.board[to];
+            // Simula jogada
+            this.board[m.to] = fromPiece;
+            this.board[m.from] = "";
 
-            const backup = [...this.board];
-            this.board[to] = piece;
-            this.board[from] = "";
-
+            // Score: captura ganha + evita perder peça
             let score = 0;
+            if (target) score += this.pieceValue(target) * 10;  // valor captura
+            if (this.isCheck(this.turn === "Brancas")) score -= this.pieceValue(fromPiece) * 5;
 
-            // Captura
-            if (target) score += this.pieceValue(target) * 10;
-
-            // Promoção
-            if (piece === "♟" && to >= 56) score += 80;
-            if (piece === "♙" && to <= 7)  score += 80;
-
-            // Evitar movimento reverso
-            if (this.lastAIMove &&
-                this.lastAIMove.from === to &&
-                this.lastAIMove.to === from) {
-                score -= 25;
-            }
-
-            // Evitar casa atacada
-            if (this.isSquareAttacked(to, enemyColor)) {
-                score -= this.pieceValue(piece) * 10;
-            }
-
-            // Evitar continuar em cheque
-            if (this.isCheck(this.turn)) score -= 50;
-
-            this.board = backup;
+            this.board[m.from] = fromPiece;
+            this.board[m.to] = target;
 
             if (score > bestScore) {
                 bestScore = score;
-                bestMove = mv;
+                bestMove = m;
             }
         }
 
         if (bestMove) {
-            this.lastAIMove = bestMove;
-
-            const target = this.board[bestMove.to];
             this.movePiece(bestMove.from, bestMove.to);
-            this.updateQTable(bestMove, target);
+            this.nextTurn();
 
             if (this.isCheckmate()) {
                 this.status = "Checkmate";
-                return;
+            } else if (this.isCheck(this.turn === "Brancas")) {
+                this.status = "Check";
             }
-
-            this.nextTurn();
         }
-    }
-
-    // =======================================================
-    //                     Q-LEARNING
-    // =======================================================
-
-    moveToKey(move) {
-        return `${this.board.join("")}:${move.from}->${move.to}`;
-    }
-
-    updateQTable(move, target) {
-        const key = this.moveToKey(move);
-        const reward = this.calculateReward(target);
-        const oldQ = this.qTable[key] || 0;
-
-        const newQ = oldQ + this.learningRate * (reward - oldQ);
-        this.qTable[key] = newQ;
-
-        localStorage.setItem("chessQTable", JSON.stringify(this.qTable));
-    }
-
-    calculateReward(target) {
-        if (!target) return 0.1;
-        return this.pieceValue(target);
     }
 }
