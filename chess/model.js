@@ -1,4 +1,4 @@
-class ChessModel {
+class ModelChess {
     constructor() {
         this.resetGame();
     }
@@ -228,3 +228,4 @@ const game = new ChessModel();
 game.makeMove({ from: 52, to: 36 }); // Peão branco exemplo
 game.makeBestMove();
 console.log('Turno agora:', game.turn);
+
