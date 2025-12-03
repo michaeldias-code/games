@@ -1,5 +1,5 @@
 // =======================================================
-//                   MODEL XADREZ COMPLETO
+//                   MODEL XADREZ COM LOGS
 // =======================================================
 class ModelChess {
     constructor() {
@@ -31,6 +31,7 @@ class ModelChess {
         this.turn = "Brancas";
         this.selected = null;
         this.status = "Em jogo";
+        console.log("Jogo reiniciado");
     }
 
     getState() {
@@ -55,7 +56,6 @@ class ModelChess {
         const piece = this.board[from];
         const target = this.board[to];
         if (!piece) return false;
-
         if (target && this.isWhite(piece) === this.isWhite(target)) return false;
 
         const rowF = Math.floor(from / 8), colF = from % 8;
@@ -78,7 +78,6 @@ class ModelChess {
         const dir = isWhite ? -1 : 1;
         const startRow = isWhite ? 6 : 1;
         const target = this.board[to];
-
         if (dCol === 0) {
             if (dRow === dir && !target) return true;
             if (dRow === 2*dir && Math.floor(from/8) === startRow && !target && !this.board[from + dir*8]) return true;
@@ -127,6 +126,7 @@ class ModelChess {
     }
 
     movePiece(from, to) {
+        console.log(`Movendo ${this.board[from]} de ${from} para ${to} (captura: ${this.board[to] || 'nenhuma'})`);
         this.board[to] = this.board[from];
         this.board[from] = "";
         this.selected = null;
@@ -134,6 +134,11 @@ class ModelChess {
 
     nextTurn() {
         this.turn = this.turn === "Brancas" ? "Pretas" : "Brancas";
+        console.log("Turno agora:", this.turn);
+    }
+
+    pieceValue(piece) {
+        return this.pieceValues[piece] || 0;
     }
 
     isCheck(whiteTurn) {
@@ -142,12 +147,17 @@ class ModelChess {
         if (kingPos === -1) return false;
 
         const enemyColor = whiteTurn ? "Pretas" : "Brancas";
-        return this.getAllPossibleMoves(enemyColor).some(m => m.to === kingPos);
+        const possibleMoves = this.getAllPossibleMoves(enemyColor);
+        const inCheck = possibleMoves.some(m => m.to === kingPos);
+        console.log(`Verificando check para ${whiteTurn ? 'Brancas' : 'Pretas'}: ${inCheck}`);
+        return inCheck;
     }
 
     isCheckmate() {
         const moves = this.getAllPossibleMoves(this.turn);
-        return moves.length === 0 && this.isCheck(this.turn === "Brancas");
+        const checkmate = moves.length === 0 && this.isCheck(this.turn === "Brancas");
+        console.log("Verificando checkmate:", checkmate);
+        return checkmate;
     }
 
     getAllPossibleMoves(turn = this.turn) {
@@ -158,30 +168,33 @@ class ModelChess {
             if ((turn === "Brancas" && this.isWhite(piece)) || (turn === "Pretas" && !this.isWhite(piece))) {
                 for (let j = 0; j < 64; j++) {
                     if (this.isValidMove(i, j)) {
-                        // Simula o movimento para evitar movimentos que deixam rei em check
+                        // Simula movimento
                         const backupFrom = this.board[i];
                         const backupTo = this.board[j];
-                        this.board[j] = this.board[i];
+                        this.board[j] = backupFrom;
                         this.board[i] = "";
                         const stillSafe = !this.isCheck(turn === "Brancas");
                         this.board[i] = backupFrom;
                         this.board[j] = backupTo;
 
-                        if (stillSafe) moves.push({from: i, to: j});
+                        if (stillSafe) {
+                            moves.push({from: i, to: j});
+                        }
                     }
                 }
             }
         }
+        console.log(`Movimentos possíveis para ${turn}:`, moves);
         return moves;
     }
 
-    pieceValue(piece) {
-        return this.pieceValues[piece] || 0;
-    }
-
     IAMove() {
-        if (this.status !== "Em jogo") return;
+        if (this.status !== "Em jogo") {
+            console.log("IA não joga: status =", this.status);
+            return;
+        }
 
+        console.log("IA jogando, turno:", this.turn);
         const moves = this.getAllPossibleMoves();
         if (!moves.length) {
             if (this.isCheck(this.turn === "Brancas")) {
@@ -189,6 +202,7 @@ class ModelChess {
             } else {
                 this.status = "Empate";
             }
+            console.log("IA não encontrou movimentos. Status atualizado para:", this.status);
             return;
         }
 
@@ -203,13 +217,14 @@ class ModelChess {
             this.board[m.to] = fromPiece;
             this.board[m.from] = "";
 
-            // Score: captura ganha + evita perder peça
             let score = 0;
-            if (target) score += this.pieceValue(target) * 10;  // valor captura
+            if (target) score += this.pieceValue(target) * 10;
             if (this.isCheck(this.turn === "Brancas")) score -= this.pieceValue(fromPiece) * 5;
 
             this.board[m.from] = fromPiece;
             this.board[m.to] = target;
+
+            console.log(`Movimento ${fromPiece} de ${m.from} para ${m.to}, score = ${score}`);
 
             if (score > bestScore) {
                 bestScore = score;
@@ -223,8 +238,12 @@ class ModelChess {
 
             if (this.isCheckmate()) {
                 this.status = "Checkmate";
+                console.log("Checkmate!");
             } else if (this.isCheck(this.turn === "Brancas")) {
                 this.status = "Check";
+                console.log("Check!");
+            } else {
+                this.status = "Em jogo";
             }
         }
     }
