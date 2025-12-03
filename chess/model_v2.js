@@ -193,3 +193,4 @@ class ChessModel {
 }
 
 console.log("ChessModel carregado com sucesso!");
+
