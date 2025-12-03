@@ -32,6 +32,19 @@ function pieceImageFromBase(p){ return p.toUpperCase() + ".svg"; }
 function randomChoice(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 
 /* ============================================================
+   LOG EDUCATIVO
+============================================================ */
+function logEdu(text){
+    const logDiv = document.getElementById("log");
+    const entry = document.createElement("div");
+    entry.textContent = text;
+    entry.style.fontSize = "14px";
+    entry.style.padding = "2px";
+    logDiv.appendChild(entry);
+    logDiv.scrollTop = logDiv.scrollHeight;
+}
+
+/* ============================================================
    LEGAL MOVES — movimentos de cada peça
 ============================================================ */
 function legalMoves(sel) {
@@ -52,10 +65,10 @@ function legalMoves(sel) {
 
     const base = p.toUpperCase();
     switch(base) {
-        case "P": // Peão
+        case "P":
             addMove(r+forward, c);
             break;
-        case "L": // Lança
+        case "L":
             for (let i=1;i<9;i++){
                 let tr = r + i*forward;
                 if (tr<0||tr>8) break;
@@ -64,21 +77,21 @@ function legalMoves(sel) {
                 else { if ((isPlayer && isAIPiece(target)) || (!isPlayer && isPlayerPiece(target))) moves.push({from:[r,c], to:[tr,c], piece:p}); break;}
             }
             break;
-        case "N": // Cavalo
+        case "N":
             let nr = r + 2*forward;
             if (nr >=0 && nr <=8){
                 if (c-1 >=0) addMove(nr, c-1);
                 if (c+1 <=8) addMove(nr, c+1);
             }
             break;
-        case "S": // Prata
+        case "S":
             [[forward,0],[forward,-1],[forward,1],[-forward,-1],[-forward,1]].forEach(([dr,dc])=>addMove(r+dr,c+dc));
             break;
-        case "G": // Ouro e promovidos
+        case "G":
         case "P+": case "L+": case "N+": case "S+":
             [[forward,0],[0,-1],[0,1],[forward,-1],[forward,1],[-forward,0]].forEach(([dr,dc])=>addMove(r+dr,c+dc));
             break;
-        case "B": // Bispo
+        case "B":
             [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([dr,dc])=>{
                 for(let i=1;i<9;i++){
                     let tr=r+dr*i, tc=c+dc*i;
@@ -89,7 +102,7 @@ function legalMoves(sel) {
                 }
             });
             break;
-        case "R": // Torre
+        case "R":
             [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dr,dc])=>{
                 for(let i=1;i<9;i++){
                     let tr=r+dr*i, tc=c+dc*i;
@@ -100,7 +113,7 @@ function legalMoves(sel) {
                 }
             });
             break;
-        case "K": // Rei
+        case "K":
             [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([dr,dc])=>addMove(r+dr,c+dc));
             break;
     }
@@ -116,10 +129,9 @@ function highlightMoves(r,c,p){
     moves.forEach(mv=>{
         const [tr,tc] = mv.to;
         const cell = document.querySelector(`.cell[data-r='${tr}'][data-c='${tc}']`);
-        if(cell) cell.style.backgroundColor = "#a2f5a2"; // verde suave
+        if(cell) cell.style.backgroundColor = "#a2f5a2";
     });
 }
-
 function clearHighlights(){
     document.querySelectorAll(".cell").forEach(cell=>cell.style.backgroundColor="");
 }
@@ -141,6 +153,7 @@ function makeDrop(move){
     const idx = capturedPlayer.indexOf(piece);
     if(idx>=0) capturedPlayer.splice(idx,1);
     board[r][c] = piece;
+    logEdu(`Drop: ${piece} em [${r},${c}]`);
     renderCaptures();
 }
 function columnHasPawn(side,col){
@@ -166,6 +179,7 @@ function makeMove(move){
     }
     board[tr][tc] = piece;
     board[fr][fc] = ".";
+    logEdu(`Movimento: ${piece} de [${fr},${fc}] → [${tr},${tc}]`);
     renderCaptures();
 }
 
@@ -208,6 +222,7 @@ function renderCaptures(){
     for(const p of capturedPlayer) pArea.innerHTML+=`<img class="piece" src="pieces/${pieceImageFromBase(p)}">`;
     for(const p of capturedAI) aArea.innerHTML+=`<img class="piece" src="pieces/${pieceImageFromBase(p)}">`;
 }
+
 function render(){
     const boardDiv = document.getElementById("board");
     boardDiv.innerHTML = "";
@@ -231,6 +246,7 @@ function render(){
     }
     renderCaptures();
 }
+
 function handleClick(r,c){
     const clickedPiece = board[r][c];
     if(selectedPiece){
@@ -264,7 +280,7 @@ function aiPlay(){
             if(p!== "." && isAIPiece(p)) legalMoves({r,c,p}).forEach(mv=>moves.push(mv));
         }
     }
-    if(moves.length===0){ log("IA não tem jogadas. Você venceu!"); gameOver=true; return; }
+    if(moves.length===0){ logEdu("IA não tem jogadas. Você venceu!"); gameOver=true; return; }
     const move = randomChoice(moves);
     makeMove(move);
     render();
@@ -275,27 +291,19 @@ function aiPlay(){
 ============================================================ */
 render();
 
-
-// ---------- Help Modal ----------
+/* ============================================================
+   Help Modal
+============================================================ */
 document.addEventListener("DOMContentLoaded", () => {
     const helpBtn = document.getElementById("help-btn");
     const helpModal = document.getElementById("help-modal");
     const helpClose = document.getElementById("help-close");
 
-    helpBtn.onclick = () => {
-        helpModal.style.display = "block";
-    };
-
-    helpClose.onclick = () => {
-        helpModal.style.display = "none";
-    };
-
-    // Fechar clicando fora do modal
-    window.onclick = (event) => {
-        if (event.target === helpModal) {
-            helpModal.style.display = "none";
-        }
-    };
+    if(helpBtn){
+        helpBtn.onclick = () => { helpModal.style.display = "block"; };
+    }
+    if(helpClose){
+        helpClose.onclick = () => { helpModal.style.display = "none"; };
+    }
+    window.onclick = (event) => { if (event.target === helpModal) helpModal.style.display = "none"; };
 });
-
-
