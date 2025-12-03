@@ -287,3 +287,4 @@ class ModelChess {
         localStorage.setItem("chessQTable", JSON.stringify(this.qTable));
     }
 }
+
