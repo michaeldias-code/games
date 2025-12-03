@@ -1,231 +1,216 @@
+// model.js
 class ModelChess {
     constructor() {
-        this.resetGame();
-    }
-
-    resetGame() {
-        // Inicializa o tabuleiro e peças
         this.board = this.createBoard();
-        this.turn = 'Brancas';
-        this.moveHistory = [];
-        this.scores = [];
+        this.turn = 'brancas';
+        this.history = [];
     }
 
     createBoard() {
-        // Representação simples do tabuleiro
-        // 0..63 índices do tabuleiro
-        let board = Array(64).fill(null);
+        const b = Array(64).fill(null);
 
-        // Exemplo: preencher peões brancos
-        for (let i = 48; i <= 55; i++) board[i] = { type: '♙', color: 'Brancas' };
-        // Exemplo: preencher peões pretos
-        for (let i = 8; i <= 15; i++) board[i] = { type: '♟', color: 'Pretas' };
-        // Outras peças (torres, cavalos, bispos, rainha, rei)
-        board[0] = { type: '♜', color: 'Pretas' };
-        board[7] = { type: '♜', color: 'Pretas' };
-        board[1] = { type: '♞', color: 'Pretas' };
-        board[6] = { type: '♞', color: 'Pretas' };
-        board[2] = { type: '♝', color: 'Pretas' };
-        board[5] = { type: '♝', color: 'Pretas' };
-        board[3] = { type: '♛', color: 'Pretas' };
-        board[4] = { type: '♚', color: 'Pretas' };
+        // Peões
+        for (let i = 8; i < 16; i++) b[i] = {tipo: '♟', cor: 'pretas'};
+        for (let i = 48; i < 56; i++) b[i] = {tipo: '♙', cor: 'brancas'};
 
-        board[56] = { type: '♖', color: 'Brancas' };
-        board[63] = { type: '♖', color: 'Brancas' };
-        board[57] = { type: '♘', color: 'Brancas' };
-        board[62] = { type: '♘', color: 'Brancas' };
-        board[58] = { type: '♗', color: 'Brancas' };
-        board[61] = { type: '♗', color: 'Brancas' };
-        board[59] = { type: '♕', color: 'Brancas' };
-        board[60] = { type: '♔', color: 'Brancas' };
+        // Torres
+        b[0] = b[7] = {tipo: '♜', cor: 'pretas'};
+        b[56] = b[63] = {tipo: '♖', cor: 'brancas'};
 
-        return board;
+        // Cavalos
+        b[1] = b[6] = {tipo: '♞', cor: 'pretas'};
+        b[57] = b[62] = {tipo: '♘', cor: 'brancas'};
+
+        // Bispos
+        b[2] = b[5] = {tipo: '♝', cor: 'pretas'};
+        b[58] = b[61] = {tipo: '♗', cor: 'brancas'};
+
+        // Rainhas
+        b[3] = {tipo: '♛', cor: 'pretas'};
+        b[59] = {tipo: '♕', cor: 'brancas'};
+
+        // Reis
+        b[4] = {tipo: '♚', cor: 'pretas'};
+        b[60] = {tipo: '♔', cor: 'brancas'};
+
+        return b;
     }
 
-    logMove(piece, from, to, capture) {
-        console.log(`Movendo ${piece.type} de ${from} para ${to} (captura: ${capture ? capture.type : 'nenhuma'})`);
+    movePiece(from, to) {
+        const piece = this.board[from];
+        if (!piece) return false;
+
+        const target = this.board[to];
+        if (target && target.cor === piece.cor) return false;
+
+        this.history.push({from, to, piece, captured: target || null});
+
+        this.board[to] = piece;
+        this.board[from] = null;
+
+        this.turn = this.turn === 'brancas' ? 'pretas' : 'brancas';
+        return true;
     }
 
-    getPossibleMoves(color) {
-        // Retorna todos os movimentos válidos para a cor
-        let moves = [];
-        for (let i = 0; i < 64; i++) {
-            let piece = this.board[i];
-            if (piece && piece.color === color) {
-                moves.push(...this.getPieceMoves(piece, i));
-            }
-        }
-        return moves;
-    }
+    getPossibleMoves(pos) {
+        const piece = this.board[pos];
+        if (!piece || piece.cor !== this.turn) return [];
 
-    getPieceMoves(piece, index) {
-        // Função simplificada para retornar movimentos possíveis
-        // Pode ser expandida para cada tipo de peça
-        let moves = [];
-        let directions = [];
+        const moves = [];
+        const addMove = (to) => {
+            if (to < 0 || to >= 64) return;
+            const target = this.board[to];
+            if (!target || target.cor !== piece.cor) moves.push(to);
+        };
 
-        switch (piece.type) {
-            case '♙': // Peão branco
-                if (this.isEmpty(index - 8)) moves.push({ from: index, to: index - 8 });
-                if ((index >= 48 && index <= 55) && this.isEmpty(index - 16)) moves.push({ from: index, to: index - 16 });
-                if (this.isEnemy(index - 9, piece.color)) moves.push({ from: index, to: index - 9 });
-                if (this.isEnemy(index - 7, piece.color)) moves.push({ from: index, to: index - 7 });
+        switch(piece.tipo) {
+            case '♙':
+                if (pos - 8 >= 0 && !this.board[pos-8]) moves.push(pos-8);
+                if (Math.floor(pos/8) === 6 && !this.board[pos-16]) moves.push(pos-16);
+                if (pos%8 !== 0 && this.board[pos-9] && this.board[pos-9].cor === 'pretas') moves.push(pos-9);
+                if (pos%8 !== 7 && this.board[pos-7] && this.board[pos-7].cor === 'pretas') moves.push(pos-7);
                 break;
-            case '♟': // Peão preto
-                if (this.isEmpty(index + 8)) moves.push({ from: index, to: index + 8 });
-                if ((index >= 8 && index <= 15) && this.isEmpty(index + 16)) moves.push({ from: index, to: index + 16 });
-                if (this.isEnemy(index + 7, piece.color)) moves.push({ from: index, to: index + 7 });
-                if (this.isEnemy(index + 9, piece.color)) moves.push({ from: index, to: index + 9 });
+            case '♟':
+                if (pos + 8 < 64 && !this.board[pos+8]) moves.push(pos+8);
+                if (Math.floor(pos/8) === 1 && !this.board[pos+16]) moves.push(pos+16);
+                if (pos%8 !== 7 && this.board[pos+9] && this.board[pos+9].cor === 'brancas') moves.push(pos+9);
+                if (pos%8 !== 0 && this.board[pos+7] && this.board[pos+7].cor === 'brancas') moves.push(pos+7);
                 break;
-            case '♚':
-            case '♔':
-                directions = [-1, 1, -8, 8, -9, -7, 7, 9];
-                directions.forEach(d => {
-                    let to = index + d;
-                    if (this.isValidSquare(to) && !this.isAlly(to, piece.color)) moves.push({ from: index, to });
-                });
+            case '♖': case '♜':
+                moves.push(...this.getLinearMoves(pos, [-1,1,-8,8]));
                 break;
-            case '♞':
-            case '♘':
-                directions = [-17, -15, -10, -6, 6, 10, 15, 17];
-                directions.forEach(d => {
-                    let to = index + d;
-                    if (this.isValidSquare(to) && !this.isAlly(to, piece.color)) moves.push({ from: index, to });
-                });
+            case '♘': case '♞':
+                moves.push(...this.getKnightMoves(pos));
                 break;
-            case '♜':
-            case '♖':
-                directions = [-1, 1, -8, 8];
-                moves.push(...this.getSlidingMoves(index, piece.color, directions));
+            case '♗': case '♝':
+                moves.push(...this.getDiagonalMoves(pos, [-9,-7,7,9]));
                 break;
-            case '♝':
-            case '♗':
-                directions = [-9, -7, 7, 9];
-                moves.push(...this.getSlidingMoves(index, piece.color, directions));
+            case '♕': case '♛':
+                moves.push(...this.getQueenMoves(pos));
                 break;
-            case '♛':
-            case '♕':
-                directions = [-1, 1, -8, 8, -9, -7, 7, 9];
-                moves.push(...this.getSlidingMoves(index, piece.color, directions));
+            case '♔': case '♚':
+                moves.push(...this.getKingMoves(pos));
                 break;
         }
 
         return moves;
     }
 
-    getSlidingMoves(index, color, directions) {
-        let moves = [];
-        directions.forEach(d => {
-            let to = index + d;
-            while (this.isValidSquare(to)) {
-                if (this.isEmpty(to)) {
-                    moves.push({ from: index, to });
-                } else if (this.isEnemy(to, color)) {
-                    moves.push({ from: index, to });
+    getLinearMoves(pos, dirs) {
+        const moves = [];
+        const piece = this.board[pos];
+        for (let d of dirs) {
+            let p = pos + d;
+            while (p >= 0 && p < 64 && this.isSameLine(pos,p,d)) {
+                if (!this.board[p]) moves.push(p);
+                else {
+                    if (this.board[p].cor !== piece.cor) moves.push(p);
                     break;
-                } else break;
-                to += d;
+                }
+                p += d;
             }
-        });
+        }
         return moves;
     }
 
-    isValidSquare(index) {
-        return index >= 0 && index < 64;
+    getDiagonalMoves(pos, dirs) {
+        const moves = [];
+        const piece = this.board[pos];
+        for (let d of dirs) {
+            let p = pos + d;
+            while (p >= 0 && p < 64 && this.isDiagonal(pos,p,d)) {
+                if (!this.board[p]) moves.push(p);
+                else {
+                    if (this.board[p].cor !== piece.cor) moves.push(p);
+                    break;
+                }
+                p += d;
+            }
+        }
+        return moves;
     }
 
-    isEmpty(index) {
-        return this.isValidSquare(index) && !this.board[index];
+    getKnightMoves(pos) {
+        const moves = [];
+        const piece = this.board[pos];
+        const offsets = [-17,-15,-10,-6,6,10,15,17];
+        for (let o of offsets) {
+            const t = pos+o;
+            if (t<0||t>63) continue;
+            const colDiff = Math.abs((pos%8)-(t%8));
+            if (colDiff>2) continue;
+            if (!this.board[t] || this.board[t].cor !== piece.cor) moves.push(t);
+        }
+        return moves;
     }
 
-    isEnemy(index, color) {
-        return this.isValidSquare(index) && this.board[index] && this.board[index].color !== color;
+    getQueenMoves(pos) {
+        return [...this.getLinearMoves(pos,[-1,1,-8,8]), ...this.getDiagonalMoves(pos,[-9,-7,7,9])];
     }
 
-    isAlly(index, color) {
-        return this.isValidSquare(index) && this.board[index] && this.board[index].color === color;
+    getKingMoves(pos) {
+        const moves = [];
+        const piece = this.board[pos];
+        const offsets = [-9,-8,-7,-1,1,7,8,9];
+        for (let o of offsets) {
+            const t = pos+o;
+            if (t<0||t>63) continue;
+            const colDiff = Math.abs((pos%8)-(t%8));
+            if (colDiff>1) continue;
+            if (!this.board[t] || this.board[t].cor !== piece.cor) moves.push(t);
+        }
+        return moves;
     }
 
-    makeMove(move) {
-        const piece = this.board[move.from];
-        const captured = this.board[move.to];
-
-        this.board[move.to] = piece;
-        this.board[move.from] = null;
-
-        this.moveHistory.push({ piece, from: move.from, to: move.to, captured });
-        this.logMove(piece, move.from, move.to, captured);
-
-        // alterna turno
-        this.turn = this.turn === 'Brancas' ? 'Pretas' : 'Brancas';
+    isSameLine(from,to,d) {
+        if (d === -1 || d === 1) return Math.floor(from/8) === Math.floor(to/8);
+        return true;
     }
 
-    undoMove() {
-        const last = this.moveHistory.pop();
-        if (!last) return;
-        this.board[last.from] = last.piece;
-        this.board[last.to] = last.captured || null;
-        this.turn = this.turn === 'Brancas' ? 'Pretas' : 'Brancas';
+    isDiagonal(from,to,d) {
+        const colDiff = Math.abs((from%8)-(to%8));
+        return colDiff === Math.abs(d%8);
     }
 
-    isInCheck(color) {
-        // Verifica se o rei está atacado
-        let kingIndex = this.board.findIndex(p => p && p.type === (color === 'Brancas' ? '♔' : '♚'));
-        if (kingIndex === -1) return false; // Rei capturado
-        let enemyMoves = this.getPossibleMoves(color === 'Brancas' ? 'Pretas' : 'Brancas');
-        return enemyMoves.some(m => m.to === kingIndex);
+    isKingInCheck(color) {
+        const kingPos = this.board.findIndex(p => p && p.tipo.toLowerCase() === '♔' && p.cor === color);
+        for (let i=0;i<64;i++){
+            const p = this.board[i];
+            if (p && p.cor !== color){
+                const moves = this.getPossibleMoves(i);
+                if (moves.includes(kingPos)) return true;
+            }
+        }
+        return false;
     }
 
     isCheckmate(color) {
-        if (!this.isInCheck(color)) return false;
-        let moves = this.getPossibleMoves(color);
-        for (let m of moves) {
-            this.makeMove(m);
-            let stillInCheck = this.isInCheck(color);
-            this.undoMove();
-            if (!stillInCheck) return false;
+        if (!this.isKingInCheck(color)) return false;
+        for (let i=0;i<64;i++){
+            const p = this.board[i];
+            if (p && p.cor === color){
+                const moves = this.getPossibleMoves(i);
+                for (let m of moves){
+                    const snapshot = this.board.slice();
+                    const target = this.board[m];
+                    this.board[m] = p;
+                    this.board[i] = null;
+                    const stillInCheck = this.isKingInCheck(color);
+                    this.board = snapshot;
+                    if (!stillInCheck) return false;
+                }
+            }
         }
         return true;
     }
 
-    evaluateMoves() {
-        let moves = this.getPossibleMoves(this.turn);
-        let scoredMoves = moves.map(m => {
-            let score = 0;
-            let captured = this.board[m.to];
-            if (captured) score += this.getPieceValue(captured.type);
-            this.makeMove(m);
-            if (this.isCheckmate(this.turn === 'Brancas' ? 'Pretas' : 'Brancas')) score += 1000;
-            if (this.isInCheck(this.turn === 'Brancas' ? 'Pretas' : 'Brancas')) score += 50;
-            this.undoMove();
-            return { move: m, score };
-        });
-        return scoredMoves;
-    }
-
-    getPieceValue(type) {
-        switch (type) {
-            case '♙': case '♟': return 1;
-            case '♘': case '♞': return 3;
-            case '♗': case '♝': return 3;
-            case '♖': case '♜': return 5;
-            case '♕': case '♛': return 9;
-            case '♔': case '♚': return 1000;
-        }
-        return 0;
-    }
-
-    makeBestMove() {
-        let scoredMoves = this.evaluateMoves();
-        scoredMoves.sort((a, b) => b.score - a.score);
-        let best = scoredMoves[0];
-        if (best) this.makeMove(best.move);
+    undoMove() {
+        if (!this.history.length) return;
+        const last = this.history.pop();
+        this.board[last.from] = last.piece;
+        this.board[last.to] = last.captured;
+        this.turn = this.turn === 'brancas' ? 'pretas' : 'brancas';
     }
 }
 
-// Exemplo de uso
-const game = new ChessModel();
-game.makeMove({ from: 52, to: 36 }); // Peão branco exemplo
-game.makeBestMove();
-console.log('Turno agora:', game.turn);
-
+console.log("ModelChess carregado com sucesso!");
