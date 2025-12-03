@@ -110,14 +110,40 @@ function legalMoves(sel) {
 /* ============================================================
    HIGHLIGHT
 ============================================================ */
-function highlightMoves(r,c,p){
+function highlightMoves(r, c, p) {
     clearHighlights();
-    const moves = legalMoves({r,c,p});
-    moves.forEach(mv=>{
-        const [tr,tc] = mv.to;
+    const moves = legalMoves({ r, c, p });
+
+    let showedPromoTip = false;
+    let showedCaptureTip = false;
+
+    moves.forEach(mv => {
+        const [tr, tc] = mv.to;
         const cell = document.querySelector(`.cell[data-r='${tr}'][data-c='${tc}']`);
-        if(cell) cell.style.backgroundColor = "#a2f5a2";
+        if (cell) cell.style.backgroundColor = "#a2f5a2";
+
+        const target = board[tr][tc];
+        const base = p.toUpperCase();
+
+        // CAPTURA DISPONÍVEL?
+        if (target !== "." && isAIPiece(target)) {
+            showedCaptureTip = true;
+        }
+
+        // PROMOÇÃO DISPONÍVEL?
+        if (!p.endsWith("+") && ["P","L","N","S","B","R"].includes(base)) {
+            if (canPromoteHover(p, tr)) {
+                showedPromoTip = true;
+            }
+        }
     });
+
+    // Exibir apenas UMA mensagem
+    if (showedPromoTip) {
+        addLog("🔥 Promoção disponível nesta jogada!");
+    } else if (showedCaptureTip) {
+        addLog("⚔️ Você pode capturar uma peça!");
+    }
 }
 
 function clearHighlights(){
@@ -182,6 +208,14 @@ function canPromote(piece, r){
     const upper = piece.toUpperCase();
     if(!["P","L","N","S"].includes(upper)) return false;
     return (currentPlayer===PLAYER && r<=2) || (currentPlayer===AI && r>=6);
+}
+function canPromoteHover(piece, r) {
+    if (!piece) return false;
+    const base = piece.toUpperCase();
+    if (!["P","L","N","S","B","R"].includes(base)) return false;
+
+    // Jogador entrando na zona inimiga (linhas 0–2)
+    return isPlayerPiece(piece) && r <= 2;
 }
 
 function showPromotionModal(r,c,callback){
