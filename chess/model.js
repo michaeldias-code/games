@@ -1,236 +1,230 @@
-// =======================================================
-//                    MODEL CHESS
-// =======================================================
-
-class ModelChess {
+class ChessModel {
     constructor() {
-        this.reset();
-        this.qTable = JSON.parse(localStorage.getItem("chessQTable") || "{}");
-        this.learningRate = 0.2;
-        this.discount = 0.9;
-        this.explorationRate = 0.3;
-        this.lastIAMove = null; // para evitar volta inútil
+        this.resetGame();
     }
 
-    reset() {
-        this.board = [
-            "♜","♞","♝","♛","♚","♝","♞","♜",
-            "♟","♟","♟","♟","♟","♟","♟","♟",
-            "","","","","","","","",
-            "","","","","","","","",
-            "","","","","","","","",
-            "","","","","","","","",
-            "♙","♙","♙","♙","♙","♙","♙","♙",
-            "♖","♘","♗","♕","♔","♗","♘","♖"
-        ];
-        this.turn = "Brancas";
-        this.selected = null;
-        this.status = "Em jogo";
-        this.lastIAMove = null;
-        console.log("Jogo reiniciado");
+    resetGame() {
+        // Inicializa o tabuleiro e peças
+        this.board = this.createBoard();
+        this.turn = 'Brancas';
+        this.moveHistory = [];
+        this.scores = [];
     }
 
-    getState() {
-        return {
-            board: this.board,
-            turn: this.turn,
-            selected: this.selected,
-            status: this.status
-        };
+    createBoard() {
+        // Representação simples do tabuleiro
+        // 0..63 índices do tabuleiro
+        let board = Array(64).fill(null);
+
+        // Exemplo: preencher peões brancos
+        for (let i = 48; i <= 55; i++) board[i] = { type: '♙', color: 'Brancas' };
+        // Exemplo: preencher peões pretos
+        for (let i = 8; i <= 15; i++) board[i] = { type: '♟', color: 'Pretas' };
+        // Outras peças (torres, cavalos, bispos, rainha, rei)
+        board[0] = { type: '♜', color: 'Pretas' };
+        board[7] = { type: '♜', color: 'Pretas' };
+        board[1] = { type: '♞', color: 'Pretas' };
+        board[6] = { type: '♞', color: 'Pretas' };
+        board[2] = { type: '♝', color: 'Pretas' };
+        board[5] = { type: '♝', color: 'Pretas' };
+        board[3] = { type: '♛', color: 'Pretas' };
+        board[4] = { type: '♚', color: 'Pretas' };
+
+        board[56] = { type: '♖', color: 'Brancas' };
+        board[63] = { type: '♖', color: 'Brancas' };
+        board[57] = { type: '♘', color: 'Brancas' };
+        board[62] = { type: '♘', color: 'Brancas' };
+        board[58] = { type: '♗', color: 'Brancas' };
+        board[61] = { type: '♗', color: 'Brancas' };
+        board[59] = { type: '♕', color: 'Brancas' };
+        board[60] = { type: '♔', color: 'Brancas' };
+
+        return board;
     }
 
-    isWhite(piece) {
-        if (!piece) return null;
-        const whitePieces = "♙♖♘♗♕♔";
-        const blackPieces = "♟♜♞♝♛♚";
-        if (whitePieces.includes(piece)) return true;
-        if (blackPieces.includes(piece)) return false;
-        return null;
+    logMove(piece, from, to, capture) {
+        console.log(`Movendo ${piece.type} de ${from} para ${to} (captura: ${capture ? capture.type : 'nenhuma'})`);
     }
 
-    movePiece(from, to) {
-        const target = this.board[to];
-        console.log(`Movendo ${this.board[from]} de ${from} para ${to} (captura: ${target || "nenhuma"})`);
-        this.board[to] = this.board[from];
-        this.board[from] = "";
-        this.selected = null;
-    }
-
-    nextTurn() {
-        this.turn = this.turn === "Brancas" ? "Pretas" : "Brancas";
-        console.log(`Turno agora: ${this.turn}`);
-    }
-
-    isValidMove(from, to) {
-        const piece = this.board[from];
-        const target = this.board[to];
-        if (!piece) return false;
-        if (target && this.isWhite(piece) === this.isWhite(target)) return false;
-
-        const rowF = Math.floor(from / 8), colF = from % 8;
-        const rowT = Math.floor(to / 8), colT = to % 8;
-        const dRow = rowT - rowF;
-        const dCol = colT - colF;
-
-        switch (piece) {
-            case "♙": return this.pawnMove(dRow, dCol, from, to, true);
-            case "♟": return this.pawnMove(dRow, dCol, from, to, false);
-            case "♖": case "♜": return this.straightMove(from, to);
-            case "♗": case "♝": return this.diagonalMove(from, to);
-            case "♕": case "♛": return this.straightMove(from,to) || this.diagonalMove(from,to);
-            case "♘": case "♞": return this.knightMove(dRow, dCol);
-            case "♔": case "♚": return this.kingMove(dRow, dCol);
-        }
-        return false;
-    }
-
-    pawnMove(dRow, dCol, from, to, isWhite) {
-        const dir = isWhite ? -1 : 1;
-        const startRow = isWhite ? 6 : 1;
-        const target = this.board[to];
-
-        if (dCol === 0) {
-            if (dRow === dir && !target) return true;
-            if (dRow === 2*dir && Math.floor(from/8) === startRow && !target && !this.board[from + dir*8]) return true;
-        }
-        if (Math.abs(dCol) === 1 && dRow === dir && target && this.isWhite(target) !== isWhite) return true;
-
-        return false;
-    }
-
-    straightMove(from, to) {
-        const rowF = Math.floor(from / 8), colF = from % 8;
-        const rowT = Math.floor(to / 8), colT = to % 8;
-
-        if (rowF !== rowT && colF !== colT) return false;
-
-        const dRow = rowT - rowF ? Math.sign(rowT - rowF) : 0;
-        const dCol = colT - colF ? Math.sign(colT - colF) : 0;
-        let r = rowF + dRow, c = colF + dCol;
-
-        while (r !== rowT || c !== colT) {
-            if (this.board[r*8 + c]) return false;
-            r += dRow; c += dCol;
-        }
-        return true;
-    }
-
-    diagonalMove(from, to) {
-        const rowF = Math.floor(from / 8), colF = from % 8;
-        const rowT = Math.floor(to / 8), colT = to % 8;
-        if (Math.abs(rowT-rowF) !== Math.abs(colT-colF)) return false;
-
-        const dRow = Math.sign(rowT - rowF);
-        const dCol = Math.sign(colT - colF);
-        let r = rowF + dRow, c = colF + dCol;
-
-        while (r !== rowT && c !== colT) {
-            if (this.board[r*8 + c]) return false;
-            r += dRow; c += dCol;
-        }
-        return true;
-    }
-
-    knightMove(dRow, dCol) {
-        return (Math.abs(dRow) === 2 && Math.abs(dCol) === 1) ||
-               (Math.abs(dRow) === 1 && Math.abs(dCol) === 2);
-    }
-
-    kingMove(dRow, dCol) {
-        return Math.abs(dRow) <= 1 && Math.abs(dCol) <= 1;
-    }
-
-    getAllPossibleMoves() {
-        const moves = [];
+    getPossibleMoves(color) {
+        // Retorna todos os movimentos válidos para a cor
+        let moves = [];
         for (let i = 0; i < 64; i++) {
-            const piece = this.board[i];
-            if (!piece) continue;
-            if ((this.turn === "Brancas" && this.isWhite(piece)) || (this.turn === "Pretas" && !this.isWhite(piece))) {
-                for (let j = 0; j < 64; j++) {
-                    if (this.isValidMove(i,j)) {
-                        // evita voltar último movimento inútil
-                        if (this.lastIAMove &&
-                            this.lastIAMove.from === j &&
-                            this.lastIAMove.to === i) continue;
-                        moves.push({from: i, to: j});
-                    }
-                }
+            let piece = this.board[i];
+            if (piece && piece.color === color) {
+                moves.push(...this.getPieceMoves(piece, i));
             }
         }
-        console.log(`Movimentos possíveis para ${this.turn}:`, moves);
         return moves;
     }
 
-    isCheck(color) {
-        const kingIndex = this.board.findIndex(p => (color==="Brancas"?p==="♔":p==="♚"));
-        const opponent = color === "Brancas" ? "Pretas" : "Brancas";
-        const tempTurn = this.turn;
-        this.turn = opponent;
-        const moves = this.getAllPossibleMoves();
-        this.turn = tempTurn;
-        return moves.some(m => m.to === kingIndex);
+    getPieceMoves(piece, index) {
+        // Função simplificada para retornar movimentos possíveis
+        // Pode ser expandida para cada tipo de peça
+        let moves = [];
+        let directions = [];
+
+        switch (piece.type) {
+            case '♙': // Peão branco
+                if (this.isEmpty(index - 8)) moves.push({ from: index, to: index - 8 });
+                if ((index >= 48 && index <= 55) && this.isEmpty(index - 16)) moves.push({ from: index, to: index - 16 });
+                if (this.isEnemy(index - 9, piece.color)) moves.push({ from: index, to: index - 9 });
+                if (this.isEnemy(index - 7, piece.color)) moves.push({ from: index, to: index - 7 });
+                break;
+            case '♟': // Peão preto
+                if (this.isEmpty(index + 8)) moves.push({ from: index, to: index + 8 });
+                if ((index >= 8 && index <= 15) && this.isEmpty(index + 16)) moves.push({ from: index, to: index + 16 });
+                if (this.isEnemy(index + 7, piece.color)) moves.push({ from: index, to: index + 7 });
+                if (this.isEnemy(index + 9, piece.color)) moves.push({ from: index, to: index + 9 });
+                break;
+            case '♚':
+            case '♔':
+                directions = [-1, 1, -8, 8, -9, -7, 7, 9];
+                directions.forEach(d => {
+                    let to = index + d;
+                    if (this.isValidSquare(to) && !this.isAlly(to, piece.color)) moves.push({ from: index, to });
+                });
+                break;
+            case '♞':
+            case '♘':
+                directions = [-17, -15, -10, -6, 6, 10, 15, 17];
+                directions.forEach(d => {
+                    let to = index + d;
+                    if (this.isValidSquare(to) && !this.isAlly(to, piece.color)) moves.push({ from: index, to });
+                });
+                break;
+            case '♜':
+            case '♖':
+                directions = [-1, 1, -8, 8];
+                moves.push(...this.getSlidingMoves(index, piece.color, directions));
+                break;
+            case '♝':
+            case '♗':
+                directions = [-9, -7, 7, 9];
+                moves.push(...this.getSlidingMoves(index, piece.color, directions));
+                break;
+            case '♛':
+            case '♕':
+                directions = [-1, 1, -8, 8, -9, -7, 7, 9];
+                moves.push(...this.getSlidingMoves(index, piece.color, directions));
+                break;
+        }
+
+        return moves;
+    }
+
+    getSlidingMoves(index, color, directions) {
+        let moves = [];
+        directions.forEach(d => {
+            let to = index + d;
+            while (this.isValidSquare(to)) {
+                if (this.isEmpty(to)) {
+                    moves.push({ from: index, to });
+                } else if (this.isEnemy(to, color)) {
+                    moves.push({ from: index, to });
+                    break;
+                } else break;
+                to += d;
+            }
+        });
+        return moves;
+    }
+
+    isValidSquare(index) {
+        return index >= 0 && index < 64;
+    }
+
+    isEmpty(index) {
+        return this.isValidSquare(index) && !this.board[index];
+    }
+
+    isEnemy(index, color) {
+        return this.isValidSquare(index) && this.board[index] && this.board[index].color !== color;
+    }
+
+    isAlly(index, color) {
+        return this.isValidSquare(index) && this.board[index] && this.board[index].color === color;
+    }
+
+    makeMove(move) {
+        const piece = this.board[move.from];
+        const captured = this.board[move.to];
+
+        this.board[move.to] = piece;
+        this.board[move.from] = null;
+
+        this.moveHistory.push({ piece, from: move.from, to: move.to, captured });
+        this.logMove(piece, move.from, move.to, captured);
+
+        // alterna turno
+        this.turn = this.turn === 'Brancas' ? 'Pretas' : 'Brancas';
+    }
+
+    undoMove() {
+        const last = this.moveHistory.pop();
+        if (!last) return;
+        this.board[last.from] = last.piece;
+        this.board[last.to] = last.captured || null;
+        this.turn = this.turn === 'Brancas' ? 'Pretas' : 'Brancas';
+    }
+
+    isInCheck(color) {
+        // Verifica se o rei está atacado
+        let kingIndex = this.board.findIndex(p => p && p.type === (color === 'Brancas' ? '♔' : '♚'));
+        if (kingIndex === -1) return false; // Rei capturado
+        let enemyMoves = this.getPossibleMoves(color === 'Brancas' ? 'Pretas' : 'Brancas');
+        return enemyMoves.some(m => m.to === kingIndex);
     }
 
     isCheckmate(color) {
-        if (!this.isCheck(color)) return false;
-        const tempTurn = this.turn;
-        this.turn = color;
-        const moves = this.getAllPossibleMoves();
-        this.turn = tempTurn;
-        return moves.length === 0;
+        if (!this.isInCheck(color)) return false;
+        let moves = this.getPossibleMoves(color);
+        for (let m of moves) {
+            this.makeMove(m);
+            let stillInCheck = this.isInCheck(color);
+            this.undoMove();
+            if (!stillInCheck) return false;
+        }
+        return true;
     }
 
-    // IA híbrida
-    IAMove() {
-        if (this.status !== "Em jogo") return;
-        const moves = this.getAllPossibleMoves();
-        if (!moves.length) return;
-
-        let bestScore = -Infinity;
-        let bestMove = moves[0];
-
-        for (const move of moves) {
-            const captured = this.board[move.to];
-            this.movePiece(move.from, move.to);
-
-            // score simples: captura + proteção
+    evaluateMoves() {
+        let moves = this.getPossibleMoves(this.turn);
+        let scoredMoves = moves.map(m => {
             let score = 0;
-            if (captured) score += this.getPieceValue(captured);
-            if (this.isCheck(this.turn)) score -= 5; // não se colocar em check
-
-            // desfaz movimento
-            this.board[move.from] = this.board[move.to];
-            this.board[move.to] = captured;
-
-            if (score > bestScore) {
-                bestScore = score;
-                bestMove = move;
-            }
-
-            console.log(`Movimento ${this.board[move.from] || "?"} de ${move.from} para ${move.to}, score = ${score}`);
-        }
-
-        // executa melhor movimento
-        const captured = this.board[bestMove.to];
-        this.movePiece(bestMove.from, bestMove.to);
-        this.lastIAMove = bestMove; // registra último movimento
-        this.nextTurn();
-
-        if (this.isCheckmate(this.turn)) {
-            this.status = `${this.turn} em checkmate`;
-            console.log("Checkmate! Fim de jogo.");
-        }
+            let captured = this.board[m.to];
+            if (captured) score += this.getPieceValue(captured.type);
+            this.makeMove(m);
+            if (this.isCheckmate(this.turn === 'Brancas' ? 'Pretas' : 'Brancas')) score += 1000;
+            if (this.isInCheck(this.turn === 'Brancas' ? 'Pretas' : 'Brancas')) score += 50;
+            this.undoMove();
+            return { move: m, score };
+        });
+        return scoredMoves;
     }
 
-    getPieceValue(piece) {
-        switch(piece) {
-            case "♟": case "♙": return 1;
-            case "♞": case "♘": return 3;
-            case "♝": case "♗": return 3;
-            case "♜": case "♖": return 5;
-            case "♛": case "♕": return 9;
-            case "♚": case "♔": return 1000;
+    getPieceValue(type) {
+        switch (type) {
+            case '♙': case '♟': return 1;
+            case '♘': case '♞': return 3;
+            case '♗': case '♝': return 3;
+            case '♖': case '♜': return 5;
+            case '♕': case '♛': return 9;
+            case '♔': case '♚': return 1000;
         }
         return 0;
     }
+
+    makeBestMove() {
+        let scoredMoves = this.evaluateMoves();
+        scoredMoves.sort((a, b) => b.score - a.score);
+        let best = scoredMoves[0];
+        if (best) this.makeMove(best.move);
+    }
 }
+
+// Exemplo de uso
+const game = new ChessModel();
+game.makeMove({ from: 52, to: 36 }); // Peão branco exemplo
+game.makeBestMove();
+console.log('Turno agora:', game.turn);
