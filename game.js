@@ -32,19 +32,6 @@ function pieceImageFromBase(p){ return p.toUpperCase() + ".svg"; }
 function randomChoice(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 
 /* ============================================================
-   LOG EDUCATIVO
-============================================================ */
-function logEdu(text){
-    const logDiv = document.getElementById("log");
-    const entry = document.createElement("div");
-    entry.textContent = text;
-    entry.style.fontSize = "14px";
-    entry.style.padding = "2px";
-    logDiv.appendChild(entry);
-    logDiv.scrollTop = logDiv.scrollHeight;
-}
-
-/* ============================================================
    LEGAL MOVES — movimentos de cada peça
 ============================================================ */
 function legalMoves(sel) {
@@ -53,7 +40,7 @@ function legalMoves(sel) {
     const c = sel.c;
     const p = sel.p;
     const isPlayer = isPlayerPiece(p);
-    const forward = isPlayer ? -1 : 1; // jogador move "para cima"
+    const forward = isPlayer ? -1 : 1;
 
     function addMove(tr, tc) {
         if (tr < 0 || tr > 8 || tc < 0 || tc > 8) return;
@@ -121,17 +108,43 @@ function legalMoves(sel) {
 }
 
 /* ============================================================
-   HIGHLIGHT DOS MOVIMENTOS VÁLIDOS
+   HIGHLIGHT DOS MOVIMENTOS VÁLIDOS COM DICAS
 ============================================================ */
-function highlightMoves(r,c,p){
+const tooltip = document.createElement("div");
+tooltip.className = "tooltip";
+document.body.appendChild(tooltip);
+
+function showTooltip(text, event) {
+    tooltip.textContent = text;
+    tooltip.style.left = event.pageX + 10 + "px";
+    tooltip.style.top = event.pageY + 10 + "px";
+    tooltip.classList.add("show");
+}
+function hideTooltip() {
+    tooltip.classList.remove("show");
+}
+
+function highlightMovesWithTips(r, c, p){
     clearHighlights();
     const moves = legalMoves({r,c,p});
     moves.forEach(mv=>{
         const [tr,tc] = mv.to;
         const cell = document.querySelector(`.cell[data-r='${tr}'][data-c='${tc}']`);
-        if(cell) cell.style.backgroundColor = "#a2f5a2";
+        if(cell){
+            cell.style.backgroundColor = "#a2f5a2"; // verde suave
+            // dica
+            let tip = "";
+            const target = board[tr][tc];
+            if(["P","L","N","S"].includes(p) && tr <= 2) tip += "Promoção disponível! ";
+            if(target !== "." && isAIPiece(target)) tip += "Você pode capturar esta peça! ";
+            if(tip) {
+                cell.onmouseenter = (e)=>showTooltip(tip,e);
+                cell.onmouseleave = hideTooltip;
+            }
+        }
     });
 }
+
 function clearHighlights(){
     document.querySelectorAll(".cell").forEach(cell=>cell.style.backgroundColor="");
 }
@@ -153,7 +166,6 @@ function makeDrop(move){
     const idx = capturedPlayer.indexOf(piece);
     if(idx>=0) capturedPlayer.splice(idx,1);
     board[r][c] = piece;
-    logEdu(`Drop: ${piece} em [${r},${c}]`);
     renderCaptures();
 }
 function columnHasPawn(side,col){
@@ -179,7 +191,6 @@ function makeMove(move){
     }
     board[tr][tc] = piece;
     board[fr][fc] = ".";
-    logEdu(`Movimento: ${piece} de [${fr},${fc}] → [${tr},${tc}]`);
     renderCaptures();
 }
 
@@ -222,7 +233,6 @@ function renderCaptures(){
     for(const p of capturedPlayer) pArea.innerHTML+=`<img class="piece" src="pieces/${pieceImageFromBase(p)}">`;
     for(const p of capturedAI) aArea.innerHTML+=`<img class="piece" src="pieces/${pieceImageFromBase(p)}">`;
 }
-
 function render(){
     const boardDiv = document.getElementById("board");
     boardDiv.innerHTML = "";
@@ -244,6 +254,18 @@ function render(){
             boardDiv.appendChild(cell);
         }
     }
+
+    // adiciona hover educativo
+    document.querySelectorAll(".cell").forEach(cell=>{
+        const r = parseInt(cell.dataset.r);
+        const c = parseInt(cell.dataset.c);
+        const p = board[r][c];
+        if(isPlayerPiece(p)){
+            cell.onmouseenter = ()=>highlightMovesWithTips(r,c,p);
+            cell.onmouseleave = hideTooltip;
+        }
+    });
+
     renderCaptures();
 }
 
@@ -263,7 +285,7 @@ function handleClick(r,c){
     if(clickedPiece!=="."){
         if(isPlayerPiece(clickedPiece)){
             selectedPiece=[r,c];
-            highlightMoves(r,c,clickedPiece);
+            highlightMovesWithTips(r,c,clickedPiece);
         }
     }
 }
@@ -280,7 +302,7 @@ function aiPlay(){
             if(p!== "." && isAIPiece(p)) legalMoves({r,c,p}).forEach(mv=>moves.push(mv));
         }
     }
-    if(moves.length===0){ logEdu("IA não tem jogadas. Você venceu!"); gameOver=true; return; }
+    if(moves.length===0){ log("IA não tem jogadas. Você venceu!"); gameOver=true; return; }
     const move = randomChoice(moves);
     makeMove(move);
     render();
@@ -290,20 +312,3 @@ function aiPlay(){
    INIT
 ============================================================ */
 render();
-
-/* ============================================================
-   Help Modal
-============================================================ */
-document.addEventListener("DOMContentLoaded", () => {
-    const helpBtn = document.getElementById("help-btn");
-    const helpModal = document.getElementById("help-modal");
-    const helpClose = document.getElementById("help-close");
-
-    if(helpBtn){
-        helpBtn.onclick = () => { helpModal.style.display = "block"; };
-    }
-    if(helpClose){
-        helpClose.onclick = () => { helpModal.style.display = "none"; };
-    }
-    window.onclick = (event) => { if (event.target === helpModal) helpModal.style.display = "none"; };
-});
