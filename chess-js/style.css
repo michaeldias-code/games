@@ -33,9 +33,10 @@ body {
 
 .black {
     background-color: #555;
-    color: #fff;
+    /*color: #fff;*/
 }
 
 .selected {
     outline: 3px solid red;
 }
+
