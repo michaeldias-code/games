@@ -1,3 +1,6 @@
+// View.js
+import { Board } from './Board.js';
+
 export class View {
     constructor(board, ai, controller) {
         this.board = board;
@@ -5,21 +8,11 @@ export class View {
         this.controller = controller;
 
         this.selected = null;
+        this.possibleMoves = [];
 
         // Criar tabuleiro
         this.boardDiv = document.createElement('div');
         this.boardDiv.id = 'chessboard';
-
-        Object.assign(this.boardDiv.style, {
-            display: 'grid',
-            gridTemplateColumns: 'repeat(8, 60px)',
-            gridTemplateRows: 'repeat(8, 60px)',
-            width: '480px',
-            height: '480px',
-            border: '2px solid black',
-            marginTop: '20px'
-        });
-
         document.body.appendChild(this.boardDiv);
 
         this.render();
@@ -28,48 +21,64 @@ export class View {
         console.log('View carregado!');
     }
 
-        render() {
+    render() {
         this.boardDiv.innerHTML = '';
+
         for (let i = 0; i < 64; i++) {
             const cell = document.createElement('div');
+            cell.classList.add('cell');
 
-            const isLight = ((Math.floor(i / 8) + i) % 2 === 0);
-            cell.classList.add(isLight ? "light" : "dark");
+            // Determinar cor das casas alternadas
+            if ((Math.floor(i / 8) + i) % 2 === 0) {
+                cell.classList.add('white-cell');
+            } else {
+                cell.classList.add('black-cell');
+            }
 
+            // Destacar casa selecionada
+            if (this.selected === i) {
+                cell.classList.add('selected');
+            }
+
+            // Destacar possíveis movimentos
+            if (this.possibleMoves.includes(i)) {
+                cell.classList.add('highlight');
+            }
+
+            // Colocar peça
             const piece = this.board.board[i];
             if (piece) cell.textContent = piece.tipo;
 
             cell.dataset.index = i;
-
-            if (this.selected === i) cell.classList.add("selected");
-
-            this.boardDiv.appendChild(cell);           
-        
+            this.boardDiv.appendChild(cell);
         }
     }
 
     addClickHandlers() {
         this.boardDiv.addEventListener('click', e => {
             const target = e.target;
-
             if (!target.dataset.index) return;
 
             const index = parseInt(target.dataset.index);
 
             // Selecionar peça branca
             if (this.selected === null) {
-                if (this.board.board[index] && this.board.board[index].cor === 'brancas') {
+                const piece = this.board.board[index];
+                if (piece && piece.cor === 'brancas') {
                     this.selected = index;
+                    // Mostrar possíveis movimentos
+                    this.possibleMoves = this.board.getPossibleMoves(index);
                 }
             }
             // Mover
             else {
-                this.controller.movePiece(this.selected, index);
+                if (this.possibleMoves.includes(index)) {
+                    this.controller.movePiece(this.selected, index);
+                    // IA joga depois
+                    setTimeout(() => this.ai.makeMove('pretas'), 300);
+                }
                 this.selected = null;
-
-                // IA move depois
-                setTimeout(() => this.ai.makeMove('pretas'), 300);
-                setTimeout(() => this.render(), 350);
+                this.possibleMoves = [];
             }
 
             this.render();
