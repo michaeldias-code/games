@@ -1,47 +1,20 @@
 // GameController.js
-import { Modules } from './config.js';
 import { Board } from './Board.js';
-import { Piece } from './Piece.js';
+import { AI } from './AI.js';
+import { View } from './View.js';
 
 export class GameController {
     constructor() {
+        console.log('GameController inicializando...');
         this.board = new Board();
-        this.turn = 'brancas';
-        this.history = [];
+        this.ai = new AI(this.board);
+        this.view = new View(this.board, this.ai, this);
+        console.log('GameController carregado!');
     }
 
-    move(from, to) {
-        const piece = this.board.getPiece(from);
-        if (!piece) return false;
-
-        const possibleMoves = this.board.getPossibleMoves(from);
-        if (!possibleMoves.includes(to)) return false;
-
-        const captured = this.board.getPiece(to);
-        this.board.setPiece(to, piece);
-        this.board.setPiece(from, null);
-
-        this.history.push({from, to, piece, captured});
-        this.turn = this.turn === 'brancas' ? 'pretas' : 'brancas';
-
-        return true;
-    }
-
-    undo() {
-        if (this.history.length === 0) return;
-        const last = this.history.pop();
-        this.board.setPiece(last.from, last.piece);
-        this.board.setPiece(last.to, last.captured);
-        this.turn = this.turn === 'brancas' ? 'pretas' : 'brancas';
-    }
-
-    isCheck(color) {
-        return this.board.isKingInCheck(color);
-    }
-
-    isCheckmate(color) {
-        return this.board.isCheckmate(color);
+    movePiece(from, to) {
+        const success = this.board.movePiece(from, to);
+        if (success) this.view.render();
+        return success;
     }
 }
-
-console.log('GameController carregado!');
