@@ -8,33 +8,35 @@ export class GameController {
     constructor() {
         console.log("GameController inicializando...");
 
-        this.board = new Board();
-        this.validator = new MoveValidator(this.board.board);
-        this.ai = new AI(this.board, this.validator);
+        this.board = new Board();                       // Tabuleiro
+        this.validator = new MoveValidator(this.board.board); // Validador de movimentos
+        this.ai = new AI(this.board, this.validator);   // IA do jogo
 
-        this.turn = 'brancas'; // controle de turno
+        this.turn = 'brancas'; // controle de turno: 'brancas' ou 'pretas'
 
-        this.view = new View(this.board, this.ai, this);
+        this.view = new View(this.board, this.ai, this); // view recebe o controller
 
         console.log("GameController carregado!");
     }
 
     movePiece(from, to) {
-        // só permite mover se for turno do jogador
         const piece = this.board.board[from];
+
+        // só permite mover se houver peça e for turno do jogador
         if (!piece || piece.cor !== this.turn) return;
 
-        // mover peça via validator
+        // valida movimento
         const validMoves = this.validator.getPossibleMoves(from);
         if (!validMoves.includes(to)) return;
 
-        // executar movimento
+        // executa movimento
         this.board.board[to] = piece;
         this.board.board[from] = null;
 
-        // mudar turno
+        // alterna o turno
         this.turn = this.turn === 'brancas' ? 'pretas' : 'brancas';
 
+        // atualiza a view
         this.view.render();
 
         // se agora for turno da IA, ela joga automaticamente
