@@ -1,7 +1,7 @@
 // MoveValidator.js
 export class MoveValidator {
-    constructor(board) {
-        this.board = board.board; // Recebe o array de 64 posições do Board
+    constructor(boardArray) {
+        this.board = boardArray; // RECEBE DIRETO O ARRAY!
         console.log('MoveValidator carregado!');
     }
 
@@ -147,3 +147,4 @@ export class MoveValidator {
         return true;
     }
 }
+
