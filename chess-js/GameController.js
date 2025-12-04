@@ -1,81 +1,47 @@
 // GameController.js
 import { Modules } from './config.js';
 import { Board } from './Board.js';
-import { AI } from './AI.js';
-import { View } from './View.js';
-import { MoveValidator } from './MoveValidator.js';
+import { Piece } from './Piece.js';
 
 export class GameController {
-  constructor() {
-    this.board = new Board();
-    this.turn = 'white'; // turno inicial
-    this.gameOver = false;
-    console.log(`[${Modules.GameController}] Jogo iniciado`);
-    View.renderBoard(this.board.grid);
-  }
-
-  playerMove(from, to) {
-    if(this.gameOver) {
-      console.log(`[${Modules.GameController}] O jogo já terminou`);
-      return;
+    constructor() {
+        this.board = new Board();
+        this.turn = 'brancas';
+        this.history = [];
     }
 
-    console.log(`[${Modules.GameController}] Jogador move de ${from} para ${to}`);
+    move(from, to) {
+        const piece = this.board.getPiece(from);
+        if (!piece) return false;
 
-    // Valida movimento
-    if(!MoveValidator.isValidMove(this.board.grid, from, to)) {
-      console.log(`[${Modules.GameController}] Movimento inválido`);
-      return false;
+        const possibleMoves = this.board.getPossibleMoves(from);
+        if (!possibleMoves.includes(to)) return false;
+
+        const captured = this.board.getPiece(to);
+        this.board.setPiece(to, piece);
+        this.board.setPiece(from, null);
+
+        this.history.push({from, to, piece, captured});
+        this.turn = this.turn === 'brancas' ? 'pretas' : 'brancas';
+
+        return true;
     }
 
-    // Executa movimento
-    const success = this.board.movePiece(from, to);
-    if(success) {
-      this.nextTurn();
-      return true;
-    }
-    return false;
-  }
-
-  nextTurn() {
-    // Alterna o turno
-    this.turn = this.turn === 'white' ? 'black' : 'white';
-    console.log(`[${Modules.GameController}] Próximo turno: ${this.turn}`);
-
-    // Verifica se o jogo acabou (placeholder)
-    if(this.checkGameOver()) {
-      this.gameOver = true;
-      console.log(`[${Modules.GameController}] Jogo encerrado!`);
-      return;
+    undo() {
+        if (this.history.length === 0) return;
+        const last = this.history.pop();
+        this.board.setPiece(last.from, last.piece);
+        this.board.setPiece(last.to, last.captured);
+        this.turn = this.turn === 'brancas' ? 'pretas' : 'brancas';
     }
 
-    // Se turno da AI, executa movimento automático
-    if(this.turn === 'black') {
-      const move = AI.chooseMove(this.board.grid, 'black');
-      if(move) {
-        console.log(`[${Modules.GameController}] IA move de ${move.from} para ${move.to}`);
-        this.playerMove(move.from, move.to); // chama recursivamente
-      } else {
-        console.log(`[${Modules.GameController}] IA não encontrou movimentos válidos`);
-        this.gameOver = true;
-      }
+    isCheck(color) {
+        return this.board.isKingInCheck(color);
     }
 
-    // Renderiza tabuleiro atualizado
-    View.renderBoard(this.board.grid);
-  }
-
-  checkGameOver() {
-    // Placeholder simples: retorna false
-    // Aqui podemos checar xeque-mate, empate, falta de movimentos
-    return false;
-  }
-
-  restartGame() {
-    console.log(`[${Modules.GameController}] Reiniciando jogo`);
-    this.board = new Board();
-    this.turn = 'white';
-    this.gameOver = false;
-    View.renderBoard(this.board.grid);
-  }
+    isCheckmate(color) {
+        return this.board.isCheckmate(color);
+    }
 }
+
+console.log('GameController carregado!');
