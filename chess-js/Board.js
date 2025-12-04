@@ -3,7 +3,6 @@ export class Board {
     constructor() {
         console.log("Board construído!");
 
-        // 64 casas
         this.board = Array(64).fill(null);
         this.setupPieces();
     }
@@ -40,5 +39,10 @@ export class Board {
         this.board[60] = { tipo: "♔", cor: "brancas" };
 
         console.log("Board pronto!");
+    }
+
+    movePiece(from, to) {
+        this.board[to] = this.board[from];
+        this.board[from] = null;
     }
 }
