@@ -8,7 +8,6 @@ export class View {
         this.controller = controller;
 
         this.selected = null;
-        this.possibleMoves = [];
 
         // Criar tabuleiro
         this.boardDiv = document.createElement('div');
@@ -25,31 +24,18 @@ export class View {
         this.boardDiv.innerHTML = '';
 
         for (let i = 0; i < 64; i++) {
+            const row = Math.floor(i / 8);
+            const col = i % 8;
+
             const cell = document.createElement('div');
             cell.classList.add('cell');
+            cell.classList.add((row + col) % 2 === 0 ? 'white' : 'black');
 
-            // Determinar cor das casas alternadas
-            if ((Math.floor(i / 8) + i) % 2 === 0) {
-                cell.classList.add('white-cell');
-            } else {
-                cell.classList.add('black-cell');
-            }
-
-            // Destacar casa selecionada
-            if (this.selected === i) {
-                cell.classList.add('selected');
-            }
-
-            // Destacar possíveis movimentos
-            if (this.possibleMoves.includes(i)) {
-                cell.classList.add('highlight');
-            }
-
-            // Colocar peça
             const piece = this.board.board[i];
             if (piece) cell.textContent = piece.tipo;
 
             cell.dataset.index = i;
+
             this.boardDiv.appendChild(cell);
         }
     }
@@ -57,28 +43,25 @@ export class View {
     addClickHandlers() {
         this.boardDiv.addEventListener('click', e => {
             const target = e.target;
+
             if (!target.dataset.index) return;
 
             const index = parseInt(target.dataset.index);
 
             // Selecionar peça branca
             if (this.selected === null) {
-                const piece = this.board.board[index];
-                if (piece && piece.cor === 'brancas') {
+                if (this.board.board[index] && this.board.board[index].cor === 'brancas') {
                     this.selected = index;
-                    // Mostrar possíveis movimentos
-                    this.possibleMoves = this.board.getPossibleMoves(index);
                 }
             }
             // Mover
             else {
-                if (this.possibleMoves.includes(index)) {
-                    this.controller.movePiece(this.selected, index);
-                    // IA joga depois
-                    setTimeout(() => this.ai.makeMove('pretas'), 300);
-                }
+                this.controller.movePiece(this.selected, index);
                 this.selected = null;
-                this.possibleMoves = [];
+
+                // IA move depois
+                setTimeout(() => this.ai.makeMove('pretas'), 300);
+                setTimeout(() => this.render(), 350);
             }
 
             this.render();
