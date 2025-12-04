@@ -1,4 +1,4 @@
-/* style.css */
+/* style.css - Revisado completo */
 body {
     display: flex;
     justify-content: center;
@@ -10,6 +10,7 @@ body {
     background-color: #f0f0f0;
 }
 
+/* Tabuleiro */
 #chessboard {
     display: grid;
     grid-template-columns: repeat(8, 60px);
@@ -17,6 +18,7 @@ body {
     border: 2px solid #333;
 }
 
+/* Casas */
 .cell {
     display: flex;
     justify-content: center;
@@ -28,15 +30,31 @@ body {
 }
 
 .white {
-    background-color: #eee;
+    background-color: #eee; /* madeira clara */
 }
 
 .black {
-    background-color: #555;
-    /*color: #fff;*/
+    background-color: #555; /* madeira escura */
 }
 
+/* Seleção */
 .selected {
     outline: 3px solid red;
 }
 
+/* Peças - cores fixas, independentes da casa */
+.piece {
+    display: inline-block;
+    font-size: 36px;
+    line-height: 1;
+}
+
+/* Peças brancas */
+.piece.brancas {
+    color: #f0d9b5; /* madeira clara */
+}
+
+/* Peças pretas */
+.piece.pretas {
+    color: #b58863; /* madeira escura */
+}
