@@ -1,91 +1,87 @@
-/* ============ Layout Geral ============ */
+/* style.css */
 
+/* Centraliza todo o corpo da página */
 body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
     margin: 0;
-    padding: 0;
+    background-color: #f0f0f0;
     font-family: Arial, sans-serif;
-    background: #e7e7e7;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
 }
 
-header {
-    margin-top: 20px;
-}
-
-main {
-    width: 100%;
-    max-width: 900px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-/* ============ HUD ============ */
-
-#hud {
-    margin: 20px 0;
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-    justify-content: center;
-    font-size: 18px;
-}
-
-#hud button {
-    padding: 10px 15px;
-    border: none;
-    background: #444;
-    color: white;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-#hud button:hover {
-    background: #666;
-}
-
-/* ============ Tabuleiro ============ */
-
-#boardContainer {
-    width: 90vw;
-    max-width: 600px;
-}
-
-#board {
+/* Container do tabuleiro */
+#chessboard {
     display: grid;
-    width: 100%;
-    aspect-ratio: 1;
-    grid-template-columns: repeat(8, 1fr);
-    grid-template-rows: repeat(8, 1fr);
+    grid-template-columns: repeat(8, 60px);
+    grid-template-rows: repeat(8, 60px);
+    width: 480px;
+    height: 480px;
     border: 4px solid #333;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
 }
 
-.square {
+/* Cada casa */
+#chessboard div {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 7vw;
-    font-weight: bold;
-    user-select: none;
+    font-size: 36px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.2s;
 }
 
-@media (min-width: 601px) {
-    .square {
-        font-size: 52px;
+/* Cores das casas */
+#chessboard div:nth-child(odd) {
+    background-color: #eee;
+}
+
+#chessboard div:nth-child(even) {
+    background-color: #555;
+}
+
+/* Alterna linhas para padrão xadrez correto */
+#chessboard div:nth-child(8n+1),
+#chessboard div:nth-child(8n+3),
+#chessboard div:nth-child(8n+5),
+#chessboard div:nth-child(8n+7) {
+    background-color: #555;
+}
+
+#chessboard div:nth-child(8n+2),
+#chessboard div:nth-child(8n+4),
+#chessboard div:nth-child(8n+6),
+#chessboard div:nth-child(8n+8) {
+    background-color: #eee;
+}
+
+/* Highlight quando uma peça é selecionada */
+#chessboard div.selected {
+    background-color: #ff0 !important;
+    transform: scale(1.1);
+}
+
+/* Highlight para possíveis movimentos */
+#chessboard div.highlight {
+    background-color: #0f0 !important;
+}
+
+/* Peças */
+#chessboard div::after {
+    pointer-events: none;
+}
+
+/* Responsividade pequena */
+@media (max-width: 600px) {
+    #chessboard {
+        grid-template-columns: repeat(8, 40px);
+        grid-template-rows: repeat(8, 40px);
+        width: 320px;
+        height: 320px;
     }
-}
 
-.white { background: #f0d9b5; }
-.black { background: #b58863; }
-
-.selected {
-    outline: 3px solid yellow;
-}
-
-footer {
-    margin: 30px 0;
-    font-size: 14px;
-    color: #666;
+    #chessboard div {
+        font-size: 24px;
+    }
 }
