@@ -1,80 +1,77 @@
 // Board.js
 import { Classes } from './config.js';
+import { Piece } from './Piece.js';
+import { MoveValidator } from './MoveValidator.js';
 
 export class Board {
     constructor() {
-        this.board = this.createBoard();
+        this.squares = Array(64).fill(null); // Tabuleiro 8x8
+        this.turn = 'brancas';
+        this.history = [];
+        this.validator = new MoveValidator(this.squares);
+        this.initBoard();
     }
 
-    createBoard() {
-        // 8x8 board representado em array de 64 posições
-        const b = Array(64).fill(null);
-
+    initBoard() {
         // Peões
-        for (let i = 8; i < 16; i++) b[i] = { tipo: '♟', cor: 'pretas' };
-        for (let i = 48; i < 56; i++) b[i] = { tipo: '♙', cor: 'brancas' };
+        for (let i = 8; i < 16; i++) this.squares[i] = new Piece('♟', 'pretas');
+        for (let i = 48; i < 56; i++) this.squares[i] = new Piece('♙', 'brancas');
 
         // Torres
-        b[0] = b[7] = { tipo: '♜', cor: 'pretas' };
-        b[56] = b[63] = { tipo: '♖', cor: 'brancas' };
+        this.squares[0] = this.squares[7] = new Piece('♜', 'pretas');
+        this.squares[56] = this.squares[63] = new Piece('♖', 'brancas');
 
         // Cavalos
-        b[1] = b[6] = { tipo: '♞', cor: 'pretas' };
-        b[57] = b[62] = { tipo: '♘', cor: 'brancas' };
+        this.squares[1] = this.squares[6] = new Piece('♞', 'pretas');
+        this.squares[57] = this.squares[62] = new Piece('♘', 'brancas');
 
         // Bispos
-        b[2] = b[5] = { tipo: '♝', cor: 'pretas' };
-        b[58] = b[61] = { tipo: '♗', cor: 'brancas' };
+        this.squares[2] = this.squares[5] = new Piece('♝', 'pretas');
+        this.squares[58] = this.squares[61] = new Piece('♗', 'brancas');
 
         // Rainhas
-        b[3] = { tipo: '♛', cor: 'pretas' };
-        b[59] = { tipo: '♕', cor: 'brancas' };
+        this.squares[3] = new Piece('♛', 'pretas');
+        this.squares[59] = new Piece('♕', 'brancas');
 
         // Reis
-        b[4] = { tipo: '♚', cor: 'pretas' };
-        b[60] = { tipo: '♔', cor: 'brancas' };
-
-        return b;
-    }
-
-    getPiece(pos) {
-        if (pos < 0 || pos >= 64) return null;
-        return this.board[pos];
-    }
-
-    setPiece(pos, piece) {
-        if (pos < 0 || pos >= 64) return false;
-        this.board[pos] = piece;
-        return true;
+        this.squares[4] = new Piece('♚', 'pretas');
+        this.squares[60] = new Piece('♔', 'brancas');
     }
 
     movePiece(from, to) {
-        const piece = this.getPiece(from);
+        const piece = this.squares[from];
         if (!piece) return false;
-        const target = this.getPiece(to);
 
-        // Salva histórico simples (para futuras implementações de undo)
-        const move = { from, to, piece, captured: target || null };
+        const possibleMoves = this.validator.getPossibleMoves(from);
+        if (!possibleMoves.includes(to)) return false;
 
-        // Executa o movimento
-        this.setPiece(to, piece);
-        this.setPiece(from, null);
+        // Salva histórico
+        this.history.push({ from, to, piece, captured: this.squares[to] });
 
-        return move;
+        // Move
+        this.squares[to] = piece;
+        this.squares[from] = null;
+
+        // Troca turno
+        this.turn = this.turn === 'brancas' ? 'pretas' : 'brancas';
+
+        return true;
     }
 
-    isEmpty(pos) {
-        return this.getPiece(pos) === null;
+    undoMove() {
+        if (!this.history.length) return;
+        const last = this.history.pop();
+        this.squares[last.from] = last.piece;
+        this.squares[last.to] = last.captured;
+        this.turn = this.turn === 'brancas' ? 'pretas' : 'brancas';
     }
 
-    isOpponent(pos, color) {
-        const p = this.getPiece(pos);
-        return p && p.cor !== color;
-    }
-
-    cloneBoard() {
-        return this.board.map(p => p ? { ...p } : null);
+    getState() {
+        return {
+            squares: this.squares,
+            turn: this.turn
+        };
     }
 }
 
-console.log('Board module carregado!');
+console.log('Board carregado!');
