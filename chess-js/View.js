@@ -24,17 +24,24 @@ export class View {
         this.boardDiv.innerHTML = '';
 
         for (let i = 0; i < 64; i++) {
-            const row = Math.floor(i / 8);
-            const col = i % 8;
-
             const cell = document.createElement('div');
             cell.classList.add('cell');
-            cell.classList.add((row + col) % 2 === 0 ? 'white' : 'black');
 
+            // Alterna cor da célula
+            if ((Math.floor(i / 8) + i) % 2 === 0) {
+                cell.classList.add('white');
+            } else {
+                cell.classList.add('black');
+            }
+
+            // Adiciona peça, se existir
             const piece = this.board.board[i];
             if (piece) cell.textContent = piece.tipo;
 
             cell.dataset.index = i;
+
+            // Destacar célula selecionada
+            if (this.selected === i) cell.classList.add('selected');
 
             this.boardDiv.appendChild(cell);
         }
@@ -61,7 +68,6 @@ export class View {
 
                 // IA move depois
                 setTimeout(() => this.ai.makeMove('pretas'), 300);
-                setTimeout(() => this.render(), 350);
             }
 
             this.render();
