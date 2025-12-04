@@ -1,27 +1,31 @@
 // AI.js
-import { Board } from './Board.js';
+import { MoveValidator } from "./MoveValidator.js";
 
 export class AI {
-    constructor(board) {
+    constructor(board, validator) {
         this.board = board;
-        console.log('AI carregado!');
+        this.validator = validator;
+        console.log("AI carregado!");
     }
 
     getRandomMove(color) {
         const moves = [];
+
         for (let i = 0; i < 64; i++) {
-            const piece = this.board.board[i];
-            if (piece && piece.cor === color) {
-                const possible = this.board.getPossibleMoves(i);
-                possible.forEach(m => moves.push({from: i, to: m}));
+            const p = this.board.board[i];
+            if (p && p.cor === color) {
+                const possible = this.validator.getPossibleMoves(i);
+                possible.forEach(dest => moves.push({ from: i, to: dest }));
             }
         }
+
         if (moves.length === 0) return null;
+
         return moves[Math.floor(Math.random() * moves.length)];
     }
 
     makeMove(color) {
-        const move = this.getRandomMove(color);
-        if (move) this.board.movePiece(move.from, move.to);
+        const m = this.getRandomMove(color);
+        if (m) this.board.movePiece(m.from, m.to);
     }
 }
