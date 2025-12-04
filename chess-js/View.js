@@ -28,29 +28,23 @@ export class View {
         console.log('View carregado!');
     }
 
-    render() {
+        render() {
         this.boardDiv.innerHTML = '';
-
         for (let i = 0; i < 64; i++) {
             const cell = document.createElement('div');
 
-            Object.assign(cell.style, {
-                width: '60px',
-                height: '60px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '36px',
-                backgroundColor: ((Math.floor(i / 8) + i) % 2 === 0) ? '#eee' : '#555',
-                color: '#000'
-            });
+            const isLight = ((Math.floor(i / 8) + i) % 2 === 0);
+            cell.classList.add(isLight ? "light" : "dark");
 
             const piece = this.board.board[i];
             if (piece) cell.textContent = piece.tipo;
 
             cell.dataset.index = i;
 
-            this.boardDiv.appendChild(cell);
+            if (this.selected === i) cell.classList.add("selected");
+
+            this.boardDiv.appendChild(cell);           
+        
         }
     }
 
