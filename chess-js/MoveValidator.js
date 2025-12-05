@@ -1,7 +1,7 @@
 // MoveValidator.js
 export class MoveValidator {
     constructor(boardArray) {
-        this.board = boardArray; // Recebe o array de 64 casas
+        this.board = boardArray; // RECEBE DIRETO O ARRAY DE 64 CASAS
         console.log('MoveValidator carregado!');
     }
 
@@ -42,27 +42,27 @@ export class MoveValidator {
                 break;
 
             case '♖': case '♜': // Torre
-                moves.push(...this.getSlidingMoves(pos, [-1, 1, -8, 8]));
+                moves.push(...this.getSlidingMoves(pos, [-1,1,-8,8]));
                 break;
 
             case '♗': case '♝': // Bispo
-                moves.push(...this.getSlidingMoves(pos, [-9, -7, 7, 9]));
+                moves.push(...this.getSlidingMoves(pos, [-9,-7,7,9]));
                 break;
 
             case '♕': case '♛': // Rainha
-                moves.push(...this.getSlidingMoves(pos, [-1, 1, -8, 8, -9, -7, 7, 9]));
+                moves.push(...this.getSlidingMoves(pos, [-1,1,-8,8,-9,-7,7,9]));
                 break;
 
             case '♘': case '♞': // Cavalo
-                [-17, -15, -10, -6, 6, 10, 15, 17].forEach(o => addMove(pos + o));
+                [-17,-15,-10,-6,6,10,15,17].forEach(o => addMove(pos + o));
                 break;
 
             case '♔': case '♚': // Rei
-                [-9, -8, -7, -1, 1, 7, 8, 9].forEach(o => addMove(pos + o));
+                [-9,-8,-7,-1,1,7,8,9].forEach(o => addMove(pos + o));
                 break;
         }
 
-        // Filtra os movimentos que deixam o rei em xeque
+        // Filtra movimentos que deixam o próprio rei em xeque
         return moves.filter(to => this.wouldNotLeaveKingInCheck(pos, to));
     }
 
@@ -122,7 +122,6 @@ export class MoveValidator {
         return false;
     }
 
-    // Auxiliar para evitar recursão infinita
     getPossibleMovesWithoutCheckFilter(pos) {
         const piece = this.board[pos];
         if (!piece) return [];
