@@ -47,10 +47,17 @@ export class View {
 
                 // Adiciona peça, se existir
                 const piece = this.board.board[i];
-                if (piece) {
-                    cell.textContent = piece.tipo;
-                }
+                //if (piece) {
+                //    cell.textContent = piece.tipo;
+                //}
 
+                if (piece) {
+                    const pieceSpan = document.createElement('span');
+                    pieceSpan.textContent = piece.tipo;
+                    pieceSpan.classList.add('piece', piece.cor); // <─ ESSENCIAL
+                    cell.appendChild(pieceSpan);
+                }
+                
                 // Seleção
                 if (this.selected === i) cell.classList.add('selected');
 
