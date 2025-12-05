@@ -90,19 +90,20 @@ h1 {
 }
 
 .game-over-message {
-    position: fixed;        /* fixa na tela */
+    position: fixed;
     bottom: 20px;           /* distância da parte inferior */
     left: 50%;              /* move o ponto de referência para o centro horizontal */
     transform: translateX(-50%); /* centraliza horizontalmente */
     font-size: 24px;
     font-weight: bold;
     color: red;
-    background-color: rgba(255, 255, 255, 0.9); /* opcional: fundo semi-transparente */
+    background-color: rgba(255, 255, 255, 0.9); /* fundo semi-transparente */
     padding: 10px 20px;
     border-radius: 8px;
     text-align: center;
-    z-index: 100;           /* garante que fique acima de outros elementos */
+    z-index: 1000;          /* garante que fique acima de todos */
 }
+
 
 /* Destaca a peça selecionada */
 .selected .piece {
@@ -110,6 +111,7 @@ h1 {
     border-radius: 50%;       /* opcional: deixa redondinho */
     padding: 2px;             /* dá um pequeno espaço */
 }
+
 
 
 
