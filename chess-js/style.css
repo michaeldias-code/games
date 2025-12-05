@@ -1,4 +1,4 @@
-/* style.css — v_1946 */
+/* style.css — v_2010 */
 
 body {
     display: flex;
@@ -9,7 +9,17 @@ body {
     background: #ddd;
     font-family: Arial, sans-serif;
 }
-
+/* h1 centralizado no topo */
+h1 {
+    position: absolute; /* fixa no topo da página */
+    top: 20px;          /* distância do topo */
+    left: 50%;          /* move o ponto de referência para o centro horizontal */
+    transform: translateX(-50%); /* centraliza horizontalmente */
+    font-size: 32px;
+    font-weight: bold;
+    color: #333;
+    margin: 0; /* remove margem padrão do h1 */
+}
 #chessboard-wrapper {
     position: relative;
     width: 480px;
@@ -78,3 +88,4 @@ body {
     color: #000000;
     text-shadow: 1px 1px 2px white;
 }
+
