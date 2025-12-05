@@ -77,10 +77,9 @@ export class View {
         });
     }
     showGameOver(message) {
-    const div = document.createElement('div');
-    div.classList.add('game-over-message');
-    div.textContent = message;
-
-    document.body.appendChild(div);
+        const div = document.createElement('div');
+        div.classList.add('game-over-message');
+        div.textContent = message;
+        document.body.appendChild(div);
     }
 }
