@@ -1,80 +1,72 @@
-// View.js _v1607
+// View.js — v_1945
 export class View {
     constructor(board, controller) {
         this.board = board;
         this.controller = controller;
         this.selected = null;
 
-        // Container do tabuleiro com números e letras
-        this.container = document.createElement('div');
-        this.container.id = 'chessboard-wrapper';
+        // Wrapper principal
+        this.container = document.createElement("div");
+        this.container.id = "chessboard-wrapper";
         document.body.appendChild(this.container);
 
-        // Div para números (8 linhas)
-        this.numbersDiv = document.createElement('div');
-        this.numbersDiv.id = 'number-label';
-        this.container.appendChild(this.numbersDiv);
-
-        // Div do tabuleiro 8x8
-        this.boardDiv = document.createElement('div');
-        this.boardDiv.id = 'chessboard';
+        // Tabuleiro
+        this.boardDiv = document.createElement("div");
+        this.boardDiv.id = "chessboard";
         this.container.appendChild(this.boardDiv);
 
-        // Div para letras (8 colunas)
-        this.lettersDiv = document.createElement('div');
-        this.lettersDiv.id = 'letter-label';
-        this.container.appendChild(this.lettersDiv);
+        // Adiciona notações externas
+        this.createFileLabels();
+        this.createRankLabels();
 
         this.render();
         this.addClickHandlers();
     }
 
+    createFileLabels() {
+        const files = "abcdefgh";
+        for (let col = 0; col < 8; col++) {
+            const label = document.createElement("div");
+            label.className = "file-label";
+            label.textContent = files[col];
+            label.style.left = `${col * 60 + 25}px`;
+            this.container.appendChild(label);
+        }
+    }
+
+    createRankLabels() {
+        for (let row = 0; row < 8; row++) {
+            const label = document.createElement("div");
+            label.className = "rank-label";
+            label.textContent = 8 - row;
+            label.style.top = `${row * 60 + 22}px`;
+            this.container.appendChild(label);
+        }
+    }
+
     render() {
-        this.boardDiv.innerHTML = '';
+        this.boardDiv.innerHTML = "";
 
         for (let row = 0; row < 8; row++) {
             for (let col = 0; col < 8; col++) {
+
                 const i = row * 8 + col;
-                const cell = document.createElement('div');
-                cell.classList.add('cell');
+                const cell = document.createElement("div");
+                cell.classList.add("cell");
 
-                // Alterna cor da célula
-                if ((row + col) % 2 === 0) {
-                    cell.classList.add('white');
-                } else {
-                    cell.classList.add('black');
-                }
+                // Alternar cor
+                cell.classList.add((row + col) % 2 === 0 ? "white" : "black");
 
-                // Adiciona peça, se existir
+                // Data index para clique
+                cell.dataset.index = i;
+
+                // Peça
                 const piece = this.board.board[i];
-                //if (piece) {
-                //    cell.textContent = piece.tipo;
-                //}
-
                 if (piece) {
-                    const pieceSpan = document.createElement('span');
-                    pieceSpan.textContent = piece.tipo;
-                    pieceSpan.classList.add('piece', piece.cor); // <─ ESSENCIAL
-                    cell.appendChild(pieceSpan);
-                }
-                
-                // Seleção
-                if (this.selected === i) cell.classList.add('selected');
-
-                // Números na primeira coluna (à esquerda)
-                if (col === 0) {
-                    const numberLabel = document.createElement('span');
-                    numberLabel.textContent = 8 - row;
-                    numberLabel.classList.add('number-label');
-                    cell.appendChild(numberLabel);
-                }
-
-                // Letras na última linha
-                if (row === 7) {
-                    const letterLabel = document.createElement('span');
-                    letterLabel.textContent = String.fromCharCode(97 + col);
-                    letterLabel.classList.add('letter-label');
-                    cell.appendChild(letterLabel);
+                    const span = document.createElement("span");
+                    span.textContent = piece.tipo;
+                    span.className = `piece ${piece.cor}`;
+                    cell.appendChild(span);
                 }
 
                 this.boardDiv.appendChild(cell);
@@ -83,18 +75,19 @@ export class View {
     }
 
     addClickHandlers() {
-        this.boardDiv.addEventListener('click', e => {
-            const target = e.target;
-            if (!target.dataset.index) return;
+        this.boardDiv.addEventListener("click", e => {
+            const cell = e.target.closest(".cell");
+            if (!cell) return;
 
-            const index = parseInt(target.dataset.index);
+            const index = parseInt(cell.dataset.index);
 
+            // Esta lógica não altera nada do GameController
             if (this.selected === null) {
-                if (this.board.board[index] && this.board.board[index].cor === 'brancas') {
+                if (this.board.board[index] && this.board.board[index].cor === "brancas") {
                     this.selected = index;
                 }
             } else {
-                if (index === this.selected) {
+                if (this.selected === index) {
                     this.selected = null;
                 } else {
                     const moved = this.controller.movePiece(this.selected, index);
@@ -107,24 +100,11 @@ export class View {
     }
 
     onGameOver({ winner, reason }) {
-        let message = '';
-        switch (reason) {
-            case 'checkmate':
-                message = `${winner} venceu por checkmate!`;
-                break;
-            case 'stalemate':
-                message = 'Empate por afogamento!';
-                break;
-            default:
-                message = 'Fim de jogo!';
-        }
-        this.showMessage(message);
-    }
-
-    showMessage(text) {
-        const div = document.createElement('div');
-        div.classList.add('game-over-message');
-        div.textContent = text;
+        const div = document.createElement("div");
+        div.className = "game-over-message";
+        div.textContent = reason === "checkmate"
+            ? `${winner} venceu por checkmate!`
+            : "Fim de jogo!";
         document.body.appendChild(div);
     }
 }
