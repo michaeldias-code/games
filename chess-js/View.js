@@ -5,8 +5,6 @@ export class View {
         this.controller = controller;
         this.selected = null;
 
-        this.lastMoveTo = null; // guarda a célula que a IA moveu
-
         // Wrapper principal
         this.container = document.createElement("div");
         this.container.id = "chessboard-wrapper";
