@@ -8,10 +8,10 @@ export class GameController {
     constructor() {
         console.log("GameController inicializando...");
 
-        // Cria o tabuleiro
+        // Cria tabuleiro
         this.board = new Board(); // this.board.board é o array de 64 casas
 
-        // Validator trabalha apenas com o array
+        // MoveValidator trabalha apenas com o array de 64 casas
         this.validator = new MoveValidator(this.board.board);
 
         // IA trabalha com board e validator
@@ -20,7 +20,7 @@ export class GameController {
         // Define turno inicial
         this.currentTurn = 'brancas';
 
-        // View recebe board, ai e controller (controller completo já está inicializado)
+        // View recebe board, ai e controller
         this.view = new View(this.board, this.ai, this);
 
         console.log("GameController carregado!");
@@ -28,7 +28,11 @@ export class GameController {
 
     movePiece(from, to) {
         const piece = this.board.board[from];
-        if (!piece) return false;
+
+        if (!piece) {
+            console.log("Nenhuma peça na posição selecionada.");
+            return false;
+        }
 
         // Confirma que é a vez da cor da peça
         if (piece.cor !== this.currentTurn) {
@@ -36,7 +40,7 @@ export class GameController {
             return false;
         }
 
-        // Obtém movimentos possíveis
+        // Obtém movimentos possíveis usando MoveValidator
         let possibleMoves = this.validator.getPossibleMoves(from);
 
         // Filtra movimentos que deixam o rei em xeque
@@ -45,7 +49,7 @@ export class GameController {
             snapshot[dest] = snapshot[from];
             snapshot[from] = null;
 
-            // Cria validator temporário para simular a jogada
+            // Move temporário para simular a jogada
             const tempValidator = new MoveValidator(snapshot);
             return !tempValidator.isKingInCheck(piece.cor);
         });
@@ -55,7 +59,7 @@ export class GameController {
             return false;
         }
 
-        // Executa o movimento
+        // Executa movimento
         this.board.board[to] = piece;
         this.board.board[from] = null;
 
@@ -65,12 +69,28 @@ export class GameController {
         // Alterna turno
         this.currentTurn = this.currentTurn === 'brancas' ? 'pretas' : 'brancas';
 
-        // Se for turno da IA, aciona automaticamente
+        // Verifica xeque ou xeque-mate
+        if (this.validator.isKingInCheck(this.currentTurn)) {
+            console.log(`Xeque para ${this.currentTurn}!`);
+            if (this.validator.isCheckmate(this.currentTurn)) {
+                console.log(`Xeque-mate! ${piece.cor} venceu!`);
+            }
+        }
+
+        // Se for turno da IA, aciona após pequeno delay
         if (this.currentTurn === 'pretas') {
             setTimeout(() => {
                 this.ai.makeMove('pretas');
                 this.view.render();
                 this.currentTurn = 'brancas';
+
+                // Verifica xeque após jogada da IA
+                if (this.validator.isKingInCheck(this.currentTurn)) {
+                    console.log(`Xeque para ${this.currentTurn}!`);
+                    if (this.validator.isCheckmate(this.currentTurn)) {
+                        console.log(`Xeque-mate! Pretas venceram!`);
+                    }
+                }
             }, 300);
         }
 
