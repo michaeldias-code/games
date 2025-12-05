@@ -1,9 +1,11 @@
-// View.js — v_1945
+// View.js — v_2031
 export class View {
     constructor(board, controller) {
         this.board = board;
         this.controller = controller;
         this.selected = null;
+
+        this.lastMoveTo = null; // guarda a célula que a IA moveu
 
         // Wrapper principal
         this.container = document.createElement("div");
