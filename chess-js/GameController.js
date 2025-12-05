@@ -1,3 +1,4 @@
+// GameController.js
 import { Board } from './Board.js';
 import { MoveValidator } from './MoveValidator.js';
 import { AI } from './AI.js';
