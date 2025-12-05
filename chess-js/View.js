@@ -1,10 +1,14 @@
-// View.js _v3
+// View.js _v4
 export class View {
     constructor(board, controller) {
         this.board = board;
         this.controller = controller;
 
         this.selected = null;
+
+        this.container = document.createElement('div');
+        this.container.id = 'chessboard-container';
+        document.body.appendChild(this.container);
 
         // Cria div do tabuleiro
         this.boardDiv = document.createElement('div');
@@ -16,6 +20,7 @@ export class View {
         this.addClickHandlers();
 
         console.log('View carregado!');
+        
     }
 
     render() {
