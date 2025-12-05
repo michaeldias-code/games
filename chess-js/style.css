@@ -1,4 +1,4 @@
-/* style.css _v1327*/
+/*style.css _v6*/
 body {
     display: flex;
     justify-content: center;
@@ -10,20 +10,39 @@ body {
     background-color: #f0f0f0;
 }
 
-#chessboard-container {
+/* Container do tabuleiro com números e letras */
+#chessboard-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-#chessboard {
-    display: grid;
-    grid-template-columns: 30px repeat(8, 60px);
-    grid-template-rows: 30px repeat(8, 60px);
-    gap: 0;
+/* Números à esquerda */
+#numbers {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 480px; /* 8 x 60px */
+    margin-right: 5px;
 }
 
-/* Células do tabuleiro */
+/* Letras abaixo */
+#letters {
+    display: flex;
+    justify-content: space-between;
+    width: 480px; /* 8 x 60px */
+    margin-top: 5px;
+}
+
+/* Tabuleiro 8x8 */
+#chessboard {
+    display: grid;
+    grid-template-columns: repeat(8, 60px);
+    grid-template-rows: repeat(8, 60px);
+    border: 2px solid #333;
+}
+
+/* Casas */
 .cell {
     display: flex;
     justify-content: center;
@@ -34,20 +53,17 @@ body {
     box-sizing: border-box;
 }
 
-/* Casas claras/escuras */
+/* Casas claras e escuras */
 .white { background-color: #FFFFFF; }
 .black { background-color: #808080; }
 
 /* Seleção de peça */
 .selected { outline: 3px solid yellow; }
 
-/* Labels (números e letras) */
-.label-cell {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+/* Números e letras */
+.number-label, .letter-label {
     font-weight: bold;
-    background-color: transparent;
+    text-align: center;
     font-size: 18px;
 }
 
@@ -58,4 +74,3 @@ body {
     font-weight: bold;
     color: red;
 }
-
