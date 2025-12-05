@@ -23,10 +23,19 @@ export class GameController {
         // Define turno inicial
         this.currentTurn = 'brancas';
 
+        // Flag para controlar se o jogo acabou
+        this.gameOver = false;
+
         console.log("GameController carregado!");
     }
 
     movePiece(from, to) {
+        // Se o jogo acabou, não faz mais movimentos
+        if (this.gameOver) {
+            console.log("O jogo terminou. Não é possível fazer mais movimentos.");
+            return false;
+        }
+
         const piece = this.board.board[from];
 
         // Verifica se a peça existe na posição de origem
@@ -65,6 +74,7 @@ export class GameController {
             console.log(`Xeque para ${this.currentTurn}!`);
             if (this.validator.isCheckmate(this.currentTurn)) {
                 console.log(`Xeque-mate! ${piece.cor} venceu!`);
+                this.gameOver = true; // Finaliza o jogo
             }
         }
 
@@ -80,6 +90,7 @@ export class GameController {
                     console.log(`Xeque para ${this.currentTurn}!`);
                     if (this.validator.isCheckmate(this.currentTurn)) {
                         console.log(`Xeque-mate! Pretas venceram!`);
+                        this.gameOver = true; // Finaliza o jogo
                     }
                 }
             }, 300); // Atraso de 300ms para a IA jogar
