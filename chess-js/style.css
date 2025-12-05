@@ -1,4 +1,4 @@
-/* style.css — v_2018 */
+/* style.css — v_2026 */
 
 body {
     display: flex;
@@ -104,7 +104,12 @@ h1 {
     z-index: 100;           /* garante que fique acima de outros elementos */
 }
 
-.selected { 
-    outline: 3px solid yellow; 
+/* Destaca a peça selecionada */
+.selected .piece {
+    background-color: yellow; /* fundo amarelo */
+    border-radius: 50%;       /* opcional: deixa redondinho */
+    padding: 2px;             /* dá um pequeno espaço */
 }
+
+
 
