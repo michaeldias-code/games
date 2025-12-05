@@ -50,7 +50,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 36px;
+    font-size: 24px; /* menor para caber números/letras */
     width: 60px;
     height: 60px;
     box-sizing: border-box;
@@ -88,3 +88,4 @@ body {
 /* Peças (se usar classe .piece) */
 .piece.brancas { color: #F0E8E5; }
 .piece.pretas { color: #000000; }
+
