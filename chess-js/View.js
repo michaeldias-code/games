@@ -21,18 +21,11 @@ export class View {
         this.boardDiv.innerHTML = '';
 
         for (let i = 0; i < 64; i++) {
-            const cell = document.createElement('div');
-            cell.classList.add('cell');
-
             const row = Math.floor(i / 8);
             const col = i % 8;
 
-            // Alterna cor da célula
-            if ((row + col) % 2 === 0) {
-                cell.classList.add('white');
-            } else {
-                cell.classList.add('black');
-            }
+            const cell = document.createElement('div');
+            cell.classList.add('cell', (row + col) % 2 === 0 ? 'white' : 'black');
 
             // Adiciona peça, se existir
             const piece = this.board.board[i];
@@ -40,25 +33,17 @@ export class View {
 
             cell.dataset.index = i;
 
-            // Destacar célula selecionada
             if (this.selected === i) cell.classList.add('selected');
 
             // Número na primeira coluna
-            if (col === 0) {
-                const numberLabel = document.createElement('span');
-                numberLabel.textContent = 8 - row; // 8->1
-                cell.appendChild(numberLabel);
-            }
+            if (col === 0) cell.appendChild(Object.assign(document.createElement('span'), { textContent: 8 - row }));
+
             // Letra na última linha
-            if (row === 7) {
-                const letterLabel = document.createElement('span');
-                letterLabel.textContent = String.fromCharCode(97 + col); // a->h
-                cell.appendChild(letterLabel);
-            }
+            if (row === 7) cell.appendChild(Object.assign(document.createElement('span'), { textContent: String.fromCharCode(97 + col) }));
+        
             this.boardDiv.appendChild(cell);
         }
     }
-
     addClickHandlers() {
         this.boardDiv.addEventListener('click', e => {
             const target = e.target;
