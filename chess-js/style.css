@@ -1,4 +1,3 @@
-/* style.css _v2 */
 body {
     display: flex;
     justify-content: center;
@@ -10,71 +9,45 @@ body {
     background-color: #f0f0f0;
 }
 
-/* Container do tabuleiro e labels */
 #chessboard-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    position: relative;
 }
 
-/* Números à esquerda das linhas */
-#numbers {
-    position: absolute;
-    top: 0;
-    left: -25px; /* espaço à esquerda do tabuleiro */
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 480px; /* 8 * 60px */
-}
-
-.number {
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-}
-
-/* Tabuleiro */
 #chessboard {
     display: grid;
-    grid-template-columns: repeat(8, 60px);
-    grid-template-rows: repeat(8, 60px);
-    border: 2px solid #333;
+    grid-template-columns: 30px repeat(8, 60px);
+    grid-template-rows: 30px repeat(8, 60px);
+    gap: 0;
 }
 
-/* Casas */
+/* Células do tabuleiro */
 .cell {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 24px; /* menor para caber números/letras */
+    font-size: 36px;
     width: 60px;
     height: 60px;
     box-sizing: border-box;
 }
 
-/* Cores das casas */
+/* Casas claras/escuras */
 .white { background-color: #FFFFFF; }
 .black { background-color: #808080; }
 
 /* Seleção de peça */
 .selected { outline: 3px solid yellow; }
 
-/* Letras abaixo do tabuleiro */
-#letters {
+/* Labels (números e letras) */
+.label-cell {
     display: flex;
-    justify-content: space-between;
-    width: 480px; /* 8 * 60px */
-    margin-top: 5px;
-}
-
-.letter {
-    width: 60px;
-    text-align: center;
+    justify-content: center;
+    align-items: center;
     font-weight: bold;
+    background-color: transparent;
+    font-size: 18px;
 }
 
 /* Mensagem de fim de jogo */
@@ -84,8 +57,3 @@ body {
     font-weight: bold;
     color: red;
 }
-
-/* Peças (se usar classe .piece) */
-.piece.brancas { color: #F0E8E5; }
-.piece.pretas { color: #000000; }
-
