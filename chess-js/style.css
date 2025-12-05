@@ -1,4 +1,4 @@
-/*style.css _v6*/
+/*style.css _v7*/
 body {
     display: flex;
     justify-content: center;
@@ -17,21 +17,30 @@ body {
     align-items: center;
 }
 
-/* Números à esquerda */
-#numbers {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 480px; /* 8 x 60px */
-    margin-right: 5px;
+/* Número à esquerda dentro da célula */
+.number-label {
+    position: absolute;
+    left: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: white;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-weight: bold;
+    font-size: 16px;
 }
 
-/* Letras abaixo */
-#letters {
-    display: flex;
-    justify-content: space-between;
-    width: 480px; /* 8 x 60px */
-    margin-top: 5px;
+/* Letras embaixo dentro da célula */
+.letter-label {
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: white;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-weight: bold;
+    font-size: 16px;
 }
 
 /* Tabuleiro 8x8 */
@@ -74,3 +83,4 @@ body {
     font-weight: bold;
     color: red;
 }
+
