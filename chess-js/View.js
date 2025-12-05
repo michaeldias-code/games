@@ -1,4 +1,4 @@
-// View.js _v7
+// View.js _v8
 export class View {
     constructor(board, controller) {
         this.board = board;
@@ -12,7 +12,7 @@ export class View {
 
         // Div para números (8 linhas)
         this.numbersDiv = document.createElement('div');
-        this.numbersDiv.id = 'numbers';
+        this.numbersDiv.id = 'numbers-label';
         this.container.appendChild(this.numbersDiv);
 
         // Div do tabuleiro 8x8
@@ -22,7 +22,7 @@ export class View {
 
         // Div para letras (8 colunas)
         this.lettersDiv = document.createElement('div');
-        this.lettersDiv.id = 'letters';
+        this.lettersDiv.id = 'letters-label';
         this.container.appendChild(this.lettersDiv);
 
         this.render();
