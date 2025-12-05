@@ -1,3 +1,4 @@
+// GameController.js
 import { Board } from './Board.js';
 import { MoveValidator } from './MoveValidator.js';
 import { AI } from './AI.js';
@@ -16,18 +17,19 @@ export class GameController {
         // IA trabalha com board e validator
         this.ai = new AI(this.board, this.validator);
 
+        // View recebe board, ai e controller
+        this.view = new View(this.board, this); // passando apenas board e controller
+
         // Define turno inicial
         this.currentTurn = 'brancas';
 
-        // Corrigir para:
-        this.view = new View(this.board, this); // passa apenas board e controller
-        
         console.log("GameController carregado!");
     }
 
     movePiece(from, to) {
         const piece = this.board.board[from];
 
+        // Verifica se a peça existe na posição de origem
         if (!piece) {
             console.log("Nenhuma peça na posição selecionada.");
             return false;
@@ -39,36 +41,26 @@ export class GameController {
             return false;
         }
 
-        // Obtém movimentos possíveis usando MoveValidator
+        // Obtém os movimentos possíveis utilizando o MoveValidator
         let possibleMoves = this.validator.getPossibleMoves(from);
 
-        // Filtra movimentos que deixam o rei em xeque
-        possibleMoves = possibleMoves.filter(dest => {
-            const snapshot = this.board.board.slice();
-            snapshot[dest] = snapshot[from];
-            snapshot[from] = null;
-
-            // Move temporário para simular a jogada
-            const tempValidator = new MoveValidator(snapshot);
-            return !tempValidator.isKingInCheck(piece.cor);
-        });
-
+        // Verifica se o movimento desejado está entre os possíveis
         if (!possibleMoves.includes(to)) {
             console.log(`Movimento inválido: ${from} -> ${to}`);
             return false;
         }
 
-        // Executa movimento
+        // Executa o movimento
         this.board.board[to] = piece;
         this.board.board[from] = null;
 
-        // Renderiza o tabuleiro
+        // Renderiza o tabuleiro após o movimento
         this.view.render();
 
-        // Alterna turno
+        // Alterna o turno entre brancas e pretas
         this.currentTurn = this.currentTurn === 'brancas' ? 'pretas' : 'brancas';
 
-        // Verifica xeque ou xeque-mate
+        // Verifica se o rei do jogador que acabou de jogar está em xeque ou xeque-mate
         if (this.validator.isKingInCheck(this.currentTurn)) {
             console.log(`Xeque para ${this.currentTurn}!`);
             if (this.validator.isCheckmate(this.currentTurn)) {
@@ -76,24 +68,24 @@ export class GameController {
             }
         }
 
-        // Se for turno da IA, aciona após pequeno delay
+        // Se for a vez das pretas, aciona a IA para jogar após um pequeno atraso
         if (this.currentTurn === 'pretas') {
             setTimeout(() => {
                 this.ai.makeMove('pretas');
-                this.view.render();
-                this.currentTurn = 'brancas';
+                this.view.render(); // Renderiza novamente após o movimento da IA
+                this.currentTurn = 'brancas'; // Alterna para as brancas
 
-                // Verifica xeque após jogada da IA
+                // Verifica xeque após o movimento da IA
                 if (this.validator.isKingInCheck(this.currentTurn)) {
                     console.log(`Xeque para ${this.currentTurn}!`);
                     if (this.validator.isCheckmate(this.currentTurn)) {
                         console.log(`Xeque-mate! Pretas venceram!`);
                     }
                 }
-            }, 300);
+            }, 300); // Atraso de 300ms para a IA jogar
         }
 
-        return true;
+        return true; // Movimento válido
     }
 }
 
