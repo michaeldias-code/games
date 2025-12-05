@@ -1,106 +1,80 @@
-/*style.css _v1527*/
+/* style.css — v_1946 */
+
 body {
     display: flex;
     justify-content: center;
     align-items: center;
-    flex-direction: column;
-    font-family: Arial, sans-serif;
+    height: 100vh;
     margin: 0;
-    padding: 20px;
-    background-color: #f0f0f0;
+    background: #ddd;
+    font-family: Arial, sans-serif;
 }
 
-/* Container do tabuleiro com números e letras */
 #chessboard-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    position: relative;
+    width: 480px;
+    height: 480px;
 }
 
-/* Número à esquerda dentro da célula */
-.number-label {
-    position: absolute;
-    left: 2px;
-    top: 50%;
-    transform: translateY(-50%);
-    background-color: white;
-    padding: 2px 4px;
-    border-radius: 3px;
-    font-weight: bold;
-    font-size: 16px;
-}
-
-/* Letras embaixo dentro da célula */
-.letter-label {
-    position: absolute;
-    bottom: 2px;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: white;
-    padding: 2px 4px;
-    border-radius: 3px;
-    font-weight: bold;
-    font-size: 16px;
-}
-
-/* Tabuleiro 8x8 */
+/* Grade do tabuleiro */
 #chessboard {
     display: grid;
-    grid-template-columns: repeat(8, 60px);
-    grid-template-rows: repeat(8, 60px);
-    border: 2px solid #333;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    width: 100%;
+    height: 100%;
+    border: 3px solid #000;
 }
 
-/* Casas */
+/* Células */
 .cell {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 36px;
-    width: 60px;
-    height: 60px;
-    box-sizing: border-box;
+    font-size: 42px;
+    user-select: none;
 }
 
-/* Casas claras e escuras */
-.white { background-color: #FFFFFF; }
-.black { background-color: #808080; }
-
-/* Seleção de peça */
-.selected { outline: 3px solid yellow; }
-
-/* Números e letras */
-.number-label, .letter-label {
-    font-weight: bold;
-    text-align: center;
-    font-size: 18px;
+.white {
+    background: #f0d9b5;
 }
 
-/* Mensagem de fim de jogo */
-.game-over-message {
-    margin-top: 20px;
-    font-size: 24px;
-    font-weight: bold;
-    color: red;
+.black {
+    background: #b58863;
 }
 
-.piece {
-    font-size: 36px;  
+/* Notações externas */
+.file-label,
+.rank-label {
+    position: absolute;
+    color: #000a;
+    font-size: 14px;
     font-weight: bold;
     pointer-events: none;
 }
 
-/* Peça branca REAL */
+/* Letras (a–h) embaixo */
+.file-label {
+    bottom: -20px;
+}
+
+/* Números (1–8) à esquerda */
+.rank-label {
+    left: -20px;
+}
+
+/* Peças */
+.piece {
+    font-size: 42px;
+    pointer-events: none;
+}
+
 .piece.brancas {
-    color: #FFFFFF; /* branco sólido */
-    text-shadow: 1px 1px 3px #000; /* contorno preto para aparecer em fundo branco */
+    color: #ffffff;
+    text-shadow: 1px 1px 3px black;
 }
 
-/* Peça preta REAL */
 .piece.pretas {
-    color: #000000; /* preto sólido */
-    text-shadow: 1px 1px 2px #FFF; /* contorno claro para aparecer em fundo cinza */
+    color: #000000;
+    text-shadow: 1px 1px 2px white;
 }
-
-
-
