@@ -112,6 +112,12 @@ h1 {
     padding: 2px;             /* dá um pequeno espaço */
 }
 
+/* Destaque para célula selecionada */
+.selected {
+    outline: 3px solid yellow; /* contorno amarelo */
+    outline-offset: -2px;       /* opcional: ajusta posição do contorno */
+}
+
 
 
 
