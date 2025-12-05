@@ -1,7 +1,7 @@
 // MoveValidator.js
 export class MoveValidator {
     constructor(boardArray) {
-        this.board = boardArray; // RECEBE DIRETO O ARRAY!
+        this.board = boardArray; // recebe direto o array de 64 posições
         console.log('MoveValidator carregado!');
     }
 
@@ -9,7 +9,7 @@ export class MoveValidator {
         return pos >= 0 && pos < 64;
     }
 
-    // Movimentos brutos (sem checar xeque)
+    // --- MOVIMENTOS BRUTOS: NÃO CHECADO SE DEIXA O REI EM XEQUE ---
     getRawMoves(pos) {
         const piece = this.board[pos];
         if (!piece) return [];
@@ -52,40 +52,15 @@ export class MoveValidator {
                 break;
 
             case '♘': case '♞': // Cavalo
-                const knightOffsets = [-17,-15,-10,-6,6,10,15,17];
-                knightOffsets.forEach(o => addMove(pos + o));
+                [-17,-15,-10,-6,6,10,15,17].forEach(o => addMove(pos + o));
                 break;
 
             case '♔': case '♚': // Rei
-                const kingOffsets = [-9,-8,-7,-1,1,7,8,9];
-                kingOffsets.forEach(o => addMove(pos + o));
+                [-9,-8,-7,-1,1,7,8,9].forEach(o => addMove(pos + o));
                 break;
         }
 
         return moves;
-    }
-
-    // Movimentos válidos (não deixam rei em xeque)
-    getPossibleMoves(pos) {
-        const rawMoves = this.getRawMoves(pos);
-        const piece = this.board[pos];
-        if (!piece) return [];
-
-        const safeMoves = [];
-
-        for (let to of rawMoves) {
-            const snapshot = this.board.slice();
-            this.board[to] = piece;
-            this.board[pos] = null;
-
-            if (!this.isKingInCheck(piece.cor)) {
-                safeMoves.push(to);
-            }
-
-            this.board = snapshot;
-        }
-
-        return safeMoves;
     }
 
     getSlidingMoves(pos, directions) {
@@ -109,16 +84,36 @@ export class MoveValidator {
     }
 
     isInSameLineOrCol(start, end, offset) {
-        const startRow = Math.floor(start/8);
+        const startRow = Math.floor(start / 8);
         const startCol = start % 8;
-        const endRow = Math.floor(end/8);
+        const endRow = Math.floor(end / 8);
         const endCol = end % 8;
 
         if (offset === -1 || offset === 1) return startRow === endRow;
         if (offset === -8 || offset === 8) return true;
-        if (offset === -9 || offset === 7) return Math.abs(endCol - startCol) === Math.abs(endRow - startRow);
-        if (offset === -7 || offset === 9) return Math.abs(endCol - startCol) === Math.abs(endRow - startRow);
+        if ([-9,7,-7,9].includes(offset)) return Math.abs(endCol - startCol) === Math.abs(endRow - startRow);
         return false;
+    }
+
+    // --- MOVIMENTOS VÁLIDOS: FILTRA MOVIMENTOS QUE DEIXARIAM O REI EM XEQUE ---
+    getPossibleMoves(pos) {
+        const piece = this.board[pos];
+        if (!piece) return [];
+
+        const rawMoves = this.getRawMoves(pos);
+        const safeMoves = [];
+
+        for (let to of rawMoves) {
+            const snapshot = this.board.slice();
+            this.board[to] = piece;
+            this.board[pos] = null;
+
+            if (!this.isKingInCheck(piece.cor)) safeMoves.push(to);
+
+            this.board = snapshot;
+        }
+
+        return safeMoves;
     }
 
     movePiece(from, to) {
@@ -141,10 +136,11 @@ export class MoveValidator {
         for (let i = 0; i < 64; i++) {
             const p = this.board[i];
             if (p && p.cor !== color) {
-                const enemyMoves = this.getRawMoves(i); // usa rawMoves para não criar loop
+                const enemyMoves = this.getRawMoves(i); // usa apenas rawMoves
                 if (enemyMoves.includes(kingPos)) return true;
             }
         }
+
         return false;
     }
 
