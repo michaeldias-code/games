@@ -92,7 +92,7 @@ export class GameController {
                     if (this.validator.isCheckmate(this.currentTurn)) {
                         console.log(`Xeque-mate! Pretas venceram!`);
                         this.gameOver = true; // Finaliza o jogo
-                        this.view.showGameOver(`${this.currentPlayer} venceu por checkmate!`);
+                        this.view.showGameOver(`${this.currentTurn} venceu por checkmate!`);
                     }
                 }
             }, 300); // Atraso de 300ms para a IA jogar
