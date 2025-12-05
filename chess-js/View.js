@@ -1,4 +1,4 @@
-// View.js _v4
+// View.js _v5
 export class View {
     constructor(board, controller) {
         this.board = board;
