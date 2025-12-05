@@ -20,9 +20,9 @@ export class GameController {
         // Define turno inicial
         this.currentTurn = 'brancas';
 
-        // View recebe board, ai e controller
-        this.view = new View(this.board, this.ai, this);
-
+        // Corrigir para:
+        this.view = new View(this.board, this); // passa apenas board e controller
+        
         console.log("GameController carregado!");
     }
 
