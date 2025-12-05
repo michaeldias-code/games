@@ -1,48 +1,69 @@
-// View.js _v5
+// View.js _v6
 export class View {
     constructor(board, controller) {
         this.board = board;
         this.controller = controller;
-
         this.selected = null;
 
+        // Container do tabuleiro com números e letras
         this.container = document.createElement('div');
-        this.container.id = 'chessboard-container';
+        this.container.id = 'chessboard-wrapper';
         document.body.appendChild(this.container);
 
-        // Cria div do tabuleiro
+        // Div para números (8 linhas)
+        this.numbersDiv = document.createElement('div');
+        this.numbersDiv.id = 'numbers';
+        this.container.appendChild(this.numbersDiv);
+
+        // Div do tabuleiro 8x8
         this.boardDiv = document.createElement('div');
         this.boardDiv.id = 'chessboard';
-        document.body.appendChild(this.boardDiv);
+        this.container.appendChild(this.boardDiv);
 
-        // Renderiza inicial
+        // Div para letras (8 colunas)
+        this.lettersDiv = document.createElement('div');
+        this.lettersDiv.id = 'letters';
+        this.container.appendChild(this.lettersDiv);
+
         this.render();
         this.addClickHandlers();
-
-        console.log('View carregado!');
-        
     }
 
     render() {
+        // Limpa tudo
         this.boardDiv.innerHTML = '';
+        this.numbersDiv.innerHTML = '';
+        this.lettersDiv.innerHTML = '';
 
+        // Números (8-1)
+        for (let i = 8; i >= 1; i--) {
+            const div = document.createElement('div');
+            div.textContent = i;
+            div.classList.add('number-label');
+            this.numbersDiv.appendChild(div);
+        }
+
+        // Letras (a-h)
+        for (let i = 0; i < 8; i++) {
+            const div = document.createElement('div');
+            div.textContent = String.fromCharCode(97 + i);
+            div.classList.add('letter-label');
+            this.lettersDiv.appendChild(div);
+        }
+
+        // Tabuleiro 8x8
         for (let i = 0; i < 64; i++) {
             const row = Math.floor(i / 8);
             const col = i % 8;
             const cell = document.createElement('div');
-            cell.classList.add('cell', (row + col) % 2 === 0 ? 'white' : 'black');
+            cell.classList.add('cell');
+            cell.classList.add((row + col) % 2 === 0 ? 'white' : 'black');
 
-            // Adiciona número na primeira coluna
-            let label = '';
-            if (col === 0) label += 8 - row;
-
-            // Adiciona letra na última linha
-            if (row === 7) label += String.fromCharCode(97 + col);
-
-            // Adiciona peça se houver
+            // Adiciona peça
             const piece = this.board.board[i];
-            if (piece) cell.textContent = piece.tipo;
-            else cell.textContent = label;
+            if (piece) {
+                cell.textContent = piece.tipo;
+            }
 
             cell.dataset.index = i;
 
@@ -59,36 +80,26 @@ export class View {
 
             const index = parseInt(target.dataset.index);
 
-            // Se nenhuma peça está selecionada ainda
             if (this.selected === null) {
                 if (this.board.board[index] && this.board.board[index].cor === 'brancas') {
-                    this.selected = index; // seleciona a peça
+                    this.selected = index;
                 }
-            } 
-            // Se já existe uma peça selecionada
-            else {
-                // Clicou na mesma célula? apenas deseleciona
+            } else {
                 if (index === this.selected) {
                     this.selected = null;
-                } 
-                // Caso contrário, tenta mover
-                else {
+                } else {
                     const moved = this.controller.movePiece(this.selected, index);
-                    if (moved) {
-                        this.selected = null; // limpa seleção apenas se o movimento foi feito
-                    }
+                    if (moved) this.selected = null;
                 }
             }
 
-            // Sempre renderiza após o clique
             this.render();
         });
     }
-    // recebe dados do Controller e decide o que mostrar
+
     onGameOver({ winner, reason }) {
         let message = '';
-
-        switch(reason) {
+        switch (reason) {
             case 'checkmate':
                 message = `${winner} venceu por checkmate!`;
                 break;
@@ -98,7 +109,6 @@ export class View {
             default:
                 message = 'Fim de jogo!';
         }
-
         this.showMessage(message);
     }
 
