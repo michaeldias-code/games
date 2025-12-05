@@ -1,4 +1,3 @@
-// MoveValidator.js
 export class MoveValidator {
     constructor(boardArray) {
         this.board = boardArray; // RECEBE DIRETO O ARRAY DE 64 CASAS
@@ -100,11 +99,21 @@ export class MoveValidator {
     }
 
     wouldNotLeaveKingInCheck(from, to) {
-        const snapshot = this.board.slice();
-        this.board[to] = this.board[from];
+        const originalPiece = this.board[from]; // A peça original da posição de origem
+        const targetPiece = this.board[to];     // A peça que está no destino
+
+        // Realiza o movimento "temporário"
+        this.board[to] = originalPiece;
         this.board[from] = null;
-        const inCheck = this.isKingInCheck(this.board[to].cor);
-        this.board = snapshot;
+
+        // Verifica se o rei do jogador que está movendo ficaria em xeque
+        const inCheck = this.isKingInCheck(originalPiece.cor);
+
+        // Restaura a posição original do tabuleiro
+        this.board[from] = originalPiece;
+        this.board[to] = targetPiece;
+
+        // Retorna se o movimento não colocaria o rei em xeque
         return !inCheck;
     }
 
@@ -167,14 +176,21 @@ export class MoveValidator {
             if (p && p.cor === color) {
                 const moves = this.getPossibleMoves(i);
                 for (let m of moves) {
-                    const snapshot = this.board.slice();
-                    this.board[m] = p;
+                    const originalPiece = this.board[i];
+                    const targetPiece = this.board[m];
+
+                    // Realiza o movimento temporário
+                    this.board[m] = originalPiece;
                     this.board[i] = null;
+                    
                     if (!this.isKingInCheck(color)) {
-                        this.board = snapshot;
+                        this.board[i] = originalPiece;
+                        this.board[m] = targetPiece;
                         return false;
                     }
-                    this.board = snapshot;
+
+                    this.board[i] = originalPiece;
+                    this.board[m] = targetPiece;
                 }
             }
         }
