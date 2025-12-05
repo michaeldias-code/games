@@ -32,12 +32,12 @@ body {
 /* Casas claras/escuras com contraste definitivo */
 .white {
     /* background-color: #d9b48f; madeira clara */
-    background-color: White;
+    background-color: #FFFFFF;
 }
 
 .black {
    /* background-color: #4b361f;  madeira escura */
-    background-color: Gray;
+    background-color: #808080;
 }
 
 /* Seleção de peça */
@@ -63,5 +63,6 @@ body {
     color: #5c3a21; /* madeira escura */
     text-shadow: 1px 1px 1px #d9b48f; /* sombra leve para contraste */
 }
+
 
 
