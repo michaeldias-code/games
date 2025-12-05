@@ -1,7 +1,6 @@
-// MoveValidator.js
 export class MoveValidator {
     constructor(boardArray) {
-        this.board = boardArray; // RECEBE DIRETO O ARRAY!
+        this.board = boardArray; // recebe o array de 64 posições
         console.log('MoveValidator carregado!');
     }
 
@@ -61,7 +60,8 @@ export class MoveValidator {
                 break;
         }
 
-        return moves;
+        // Filtra movimentos que deixariam o rei em xeque
+        return moves.filter(to => this.canMove(pos, to));
     }
 
     getSlidingMoves(pos, directions) {
@@ -85,9 +85,9 @@ export class MoveValidator {
     }
 
     isInSameLineOrCol(start, end, offset) {
-        const startRow = Math.floor(start/8);
+        const startRow = Math.floor(start / 8);
         const startCol = start % 8;
-        const endRow = Math.floor(end/8);
+        const endRow = Math.floor(end / 8);
         const endCol = end % 8;
 
         if (offset === -1 || offset === 1) return startRow === endRow;
@@ -97,11 +97,26 @@ export class MoveValidator {
         return false;
     }
 
+    // Verifica se um movimento deixa o rei seguro
+    canMove(from, to) {
+        const piece = this.board[from];
+        if (!piece) return false;
+
+        const snapshot = this.board.slice();
+        this.board[to] = piece;
+        this.board[from] = null;
+
+        const kingSafe = !this.isKingInCheck(piece.cor);
+
+        this.board = snapshot;
+        return kingSafe;
+    }
+
     movePiece(from, to) {
         const piece = this.board[from];
         const possible = this.getPossibleMoves(from);
         if (!possible.includes(to)) {
-            console.log(`Movimento inválido: ${from} -> ${to}`);
+            console.log(`Movimento inválido (xeque): ${from} -> ${to}`);
             return false;
         }
 
@@ -114,9 +129,9 @@ export class MoveValidator {
         const kingPos = this.board.findIndex(p => p && ((p.tipo === '♔' && p.cor === color) || (p.tipo === '♚' && p.cor === color)));
         if (kingPos === -1) return false;
 
-        for (let i=0;i<64;i++){
+        for (let i = 0; i < 64; i++) {
             const p = this.board[i];
-            if (p && p.cor !== color){
+            if (p && p.cor !== color) {
                 const moves = this.getPossibleMoves(i);
                 if (moves.includes(kingPos)) return true;
             }
@@ -127,11 +142,11 @@ export class MoveValidator {
     isCheckmate(color) {
         if (!this.isKingInCheck(color)) return false;
 
-        for (let i=0;i<64;i++){
+        for (let i = 0; i < 64; i++) {
             const p = this.board[i];
-            if (p && p.cor === color){
+            if (p && p.cor === color) {
                 const moves = this.getPossibleMoves(i);
-                for (let m of moves){
+                for (let m of moves) {
                     const snapshot = this.board.slice();
                     this.board[m] = p;
                     this.board[i] = null;
@@ -147,4 +162,3 @@ export class MoveValidator {
         return true;
     }
 }
-
