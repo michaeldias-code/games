@@ -8,7 +8,7 @@ export class GameController {
     constructor() {
         console.log("GameController inicializando...");
 
-        // Cria tabuleiro
+        // Cria o tabuleiro
         this.board = new Board(); // this.board.board é o array de 64 casas
 
         // MoveValidator trabalha apenas com o array de 64 casas
@@ -20,9 +20,9 @@ export class GameController {
         // Define turno inicial
         this.currentTurn = 'brancas';
 
-        // Corrigir para:
-        this.view = new View(this.board, this); // passa apenas board e controller
-        
+        // View recebe board, controller e a referência para o controller
+        this.view = new View(this.board, this); 
+
         console.log("GameController carregado!");
     }
 
@@ -69,13 +69,8 @@ export class GameController {
         // Alterna turno
         this.currentTurn = this.currentTurn === 'brancas' ? 'pretas' : 'brancas';
 
-        // Verifica xeque ou xeque-mate
-        if (this.validator.isKingInCheck(this.currentTurn)) {
-            console.log(`Xeque para ${this.currentTurn}!`);
-            if (this.validator.isCheckmate(this.currentTurn)) {
-                console.log(`Xeque-mate! ${piece.cor} venceu!`);
-            }
-        }
+        // Verifica xeque ou xeque-mate após o movimento
+        this.checkGameState();
 
         // Se for turno da IA, aciona após pequeno delay
         if (this.currentTurn === 'pretas') {
@@ -83,18 +78,22 @@ export class GameController {
                 this.ai.makeMove('pretas');
                 this.view.render();
                 this.currentTurn = 'brancas';
-
-                // Verifica xeque após jogada da IA
-                if (this.validator.isKingInCheck(this.currentTurn)) {
-                    console.log(`Xeque para ${this.currentTurn}!`);
-                    if (this.validator.isCheckmate(this.currentTurn)) {
-                        console.log(`Xeque-mate! Pretas venceram!`);
-                    }
-                }
+                
+                // Verifica xeque ou xeque-mate após o movimento da IA
+                this.checkGameState();
             }, 300);
         }
 
         return true;
+    }
+
+    checkGameState() {
+        if (this.validator.isKingInCheck(this.currentTurn)) {
+            console.log(`Xeque para ${this.currentTurn}!`);
+            if (this.validator.isCheckmate(this.currentTurn)) {
+                console.log(`Xeque-mate! ${this.currentTurn === 'brancas' ? 'Pretas' : 'Brancas'} venceram!`);
+            }
+        }
     }
 }
 
