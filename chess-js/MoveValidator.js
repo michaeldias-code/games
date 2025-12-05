@@ -1,6 +1,7 @@
+// MoveValidator.js
 export class MoveValidator {
     constructor(boardArray) {
-        this.board = boardArray; // recebe o array de 64 posições
+        this.board = boardArray; // RECEBE DIRETO O ARRAY!
         console.log('MoveValidator carregado!');
     }
 
@@ -8,7 +9,8 @@ export class MoveValidator {
         return pos >= 0 && pos < 64;
     }
 
-    getPossibleMoves(pos) {
+    // Movimentos brutos (sem checar xeque)
+    getRawMoves(pos) {
         const piece = this.board[pos];
         if (!piece) return [];
 
@@ -60,8 +62,30 @@ export class MoveValidator {
                 break;
         }
 
-        // Filtra movimentos que deixariam o rei em xeque
-        return moves.filter(to => this.canMove(pos, to));
+        return moves;
+    }
+
+    // Movimentos válidos (não deixam rei em xeque)
+    getPossibleMoves(pos) {
+        const rawMoves = this.getRawMoves(pos);
+        const piece = this.board[pos];
+        if (!piece) return [];
+
+        const safeMoves = [];
+
+        for (let to of rawMoves) {
+            const snapshot = this.board.slice();
+            this.board[to] = piece;
+            this.board[pos] = null;
+
+            if (!this.isKingInCheck(piece.cor)) {
+                safeMoves.push(to);
+            }
+
+            this.board = snapshot;
+        }
+
+        return safeMoves;
     }
 
     getSlidingMoves(pos, directions) {
@@ -85,9 +109,9 @@ export class MoveValidator {
     }
 
     isInSameLineOrCol(start, end, offset) {
-        const startRow = Math.floor(start / 8);
+        const startRow = Math.floor(start/8);
         const startCol = start % 8;
-        const endRow = Math.floor(end / 8);
+        const endRow = Math.floor(end/8);
         const endCol = end % 8;
 
         if (offset === -1 || offset === 1) return startRow === endRow;
@@ -97,26 +121,11 @@ export class MoveValidator {
         return false;
     }
 
-    // Verifica se um movimento deixa o rei seguro
-    canMove(from, to) {
-        const piece = this.board[from];
-        if (!piece) return false;
-
-        const snapshot = this.board.slice();
-        this.board[to] = piece;
-        this.board[from] = null;
-
-        const kingSafe = !this.isKingInCheck(piece.cor);
-
-        this.board = snapshot;
-        return kingSafe;
-    }
-
     movePiece(from, to) {
         const piece = this.board[from];
         const possible = this.getPossibleMoves(from);
         if (!possible.includes(to)) {
-            console.log(`Movimento inválido (xeque): ${from} -> ${to}`);
+            console.log(`Movimento inválido: ${from} -> ${to}`);
             return false;
         }
 
@@ -132,8 +141,8 @@ export class MoveValidator {
         for (let i = 0; i < 64; i++) {
             const p = this.board[i];
             if (p && p.cor !== color) {
-                const moves = this.getPossibleMoves(i);
-                if (moves.includes(kingPos)) return true;
+                const enemyMoves = this.getRawMoves(i); // usa rawMoves para não criar loop
+                if (enemyMoves.includes(kingPos)) return true;
             }
         }
         return false;
