@@ -1,19 +1,16 @@
-// View.js
-import { Board } from './Board.js';
-
 export class View {
-    constructor(board, ai, controller) {
+    constructor(board, controller) {
         this.board = board;
-        this.ai = ai;
         this.controller = controller;
 
         this.selected = null;
 
-        // Criar tabuleiro
+        // Criar div do tabuleiro
         this.boardDiv = document.createElement('div');
         this.boardDiv.id = 'chessboard';
         document.body.appendChild(this.boardDiv);
 
+        // Renderiza inicial
         this.render();
         this.addClickHandlers();
 
@@ -50,31 +47,26 @@ export class View {
     addClickHandlers() {
         this.boardDiv.addEventListener('click', e => {
             const target = e.target;
-
             if (!target.dataset.index) return;
 
             const index = parseInt(target.dataset.index);
 
-            // Selecionar peça do jogador
+            // Selecionar peça branca
             if (this.selected === null) {
-                const piece = this.board.board[index];
-                if (piece && piece.cor === 'brancas') {
+                if (this.board.board[index] && this.board.board[index].cor === 'brancas') {
                     this.selected = index;
                 }
             } 
-            // Tentar mover a peça selecionada
+            // Mover peça
             else {
                 const moved = this.controller.movePiece(this.selected, index);
-
-                // IA só joga se o movimento foi válido
                 if (moved) {
-                    setTimeout(() => this.ai.makeMove('pretas'), 300);
+                    // Apenas limpar a seleção, IA é chamada pelo GameController
+                    this.selected = null;
                 }
-
-                // Resetar seleção independentemente de ter movido
-                this.selected = null;
             }
 
+            // Renderiza sempre após qualquer clique
             this.render();
         });
     }
