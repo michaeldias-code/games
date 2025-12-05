@@ -55,19 +55,24 @@ export class View {
 
             const index = parseInt(target.dataset.index);
 
-            // Selecionar peça branca
+            // Selecionar peça do jogador
             if (this.selected === null) {
-                if (this.board.board[index] && this.board.board[index].cor === 'brancas') {
+                const piece = this.board.board[index];
+                if (piece && piece.cor === 'brancas') {
                     this.selected = index;
                 }
-            }
-            // Mover
+            } 
+            // Tentar mover a peça selecionada
             else {
-                this.controller.movePiece(this.selected, index);
-                this.selected = null;
+                const moved = this.controller.movePiece(this.selected, index);
 
-                // IA move depois
-                setTimeout(() => this.ai.makeMove('pretas'), 300);
+                // IA só joga se o movimento foi válido
+                if (moved) {
+                    setTimeout(() => this.ai.makeMove('pretas'), 300);
+                }
+
+                // Resetar seleção independentemente de ter movido
+                this.selected = null;
             }
 
             this.render();
