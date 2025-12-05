@@ -75,7 +75,10 @@ export class GameController {
             if (this.validator.isCheckmate(this.currentTurn)) {
                 console.log(`Xeque-mate! ${piece.cor} venceu!`);
                 this.gameOver = true; // Finaliza o jogo
-                this.view.showGameOver(`${piece.cor} venceu por checkmate!`);
+                this.view.onGameOver({
+                    winner: this.currentTurn
+                    reason: 'checkmate'
+                });                      
             }
         }
 
@@ -92,7 +95,10 @@ export class GameController {
                     if (this.validator.isCheckmate(this.currentTurn)) {
                         console.log(`Xeque-mate! Pretas venceram!`);
                         this.gameOver = true; // Finaliza o jogo
-                        this.view.showGameOver(`Pretas venceram por checkmate!`);
+                        this.view.onGameOver({
+                            winner: this.currentTurn
+                            reason: 'checkmate'
+                        });                      
                     }
                 }
             }, 300); // Atraso de 300ms para a IA jogar
