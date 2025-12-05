@@ -104,3 +104,7 @@ h1 {
     z-index: 100;           /* garante que fique acima de outros elementos */
 }
 
+.selected { 
+    outline: 3px solid yellow; 
+}
+
