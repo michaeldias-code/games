@@ -1,4 +1,4 @@
-/*style.css _v7*/
+/*style.css _v1527*/
 body {
     display: flex;
     justify-content: center;
@@ -101,5 +101,6 @@ body {
     color: #000000; /* preto sólido */
     text-shadow: 1px 1px 2px #FFF; /* contorno claro para aparecer em fundo cinza */
 }
+
 
 
