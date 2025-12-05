@@ -8,27 +8,26 @@ export class GameController {
     constructor() {
         console.log("GameController inicializando...");
 
-        // Cria tabuleiro
+        // Cria o tabuleiro
         this.board = new Board(); // this.board.board é o array de 64 casas
 
-        // MoveValidator trabalha apenas com o array de 64 casas
+        // Validator trabalha apenas com o array
         this.validator = new MoveValidator(this.board.board);
 
         // IA trabalha com board e validator
         this.ai = new AI(this.board, this.validator);
 
-        // View recebe board, ai e controller
-        this.view = new View(this.board, this.ai, this);
-
         // Define turno inicial
         this.currentTurn = 'brancas';
+
+        // View recebe board, ai e controller (controller completo já está inicializado)
+        this.view = new View(this.board, this.ai, this);
 
         console.log("GameController carregado!");
     }
 
     movePiece(from, to) {
         const piece = this.board.board[from];
-
         if (!piece) return false;
 
         // Confirma que é a vez da cor da peça
@@ -37,7 +36,7 @@ export class GameController {
             return false;
         }
 
-        // Obtém movimentos possíveis usando MoveValidator
+        // Obtém movimentos possíveis
         let possibleMoves = this.validator.getPossibleMoves(from);
 
         // Filtra movimentos que deixam o rei em xeque
@@ -46,6 +45,7 @@ export class GameController {
             snapshot[dest] = snapshot[from];
             snapshot[from] = null;
 
+            // Cria validator temporário para simular a jogada
             const tempValidator = new MoveValidator(snapshot);
             return !tempValidator.isKingInCheck(piece.cor);
         });
@@ -55,7 +55,7 @@ export class GameController {
             return false;
         }
 
-        // Executa movimento
+        // Executa o movimento
         this.board.board[to] = piece;
         this.board.board[from] = null;
 
@@ -65,13 +65,11 @@ export class GameController {
         // Alterna turno
         this.currentTurn = this.currentTurn === 'brancas' ? 'pretas' : 'brancas';
 
-        // Se for turno da IA, aciona após pequeno delay
+        // Se for turno da IA, aciona automaticamente
         if (this.currentTurn === 'pretas') {
             setTimeout(() => {
                 this.ai.makeMove('pretas');
                 this.view.render();
-
-                // Alterna turno de volta para o jogador
                 this.currentTurn = 'brancas';
             }, 300);
         }
