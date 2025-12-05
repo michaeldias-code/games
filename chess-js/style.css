@@ -105,18 +105,12 @@ h1 {
 }
 
 
-/* Destaca a peça selecionada */
-.selected .piece {
-    background-color: yellow; /* fundo amarelo */
-    border-radius: 50%;       /* opcional: deixa redondinho */
-    padding: 2px;             /* dá um pequeno espaço */
-}
-
 /* Destaque para célula selecionada */
 .selected {
     outline: 3px solid yellow; /* contorno amarelo */
     outline-offset: -2px;       /* opcional: ajusta posição do contorno */
 }
+
 
 
 
