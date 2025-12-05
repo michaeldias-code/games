@@ -84,3 +84,22 @@ body {
     color: red;
 }
 
+.piece {
+    font-size: 36px;  
+    font-weight: bold;
+    pointer-events: none;
+}
+
+/* Peça branca REAL */
+.piece.brancas {
+    color: #FFFFFF; /* branco sólido */
+    text-shadow: 1px 1px 3px #000; /* contorno preto para aparecer em fundo branco */
+}
+
+/* Peça preta REAL */
+.piece.pretas {
+    color: #000000; /* preto sólido */
+    text-shadow: 1px 1px 2px #FFF; /* contorno claro para aparecer em fundo cinza */
+}
+
+
