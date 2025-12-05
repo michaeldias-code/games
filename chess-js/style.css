@@ -111,10 +111,7 @@ h1 {
     padding: 2px;             /* dá um pequeno espaço */
 }
 
-/* Destaca a última casa movida pela IA */
-.last-move {
-    background-color: red !important;
-}
+
 
 
 
