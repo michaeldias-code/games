@@ -51,12 +51,12 @@ body {
 
 /* Peças brancas */
 .piece.brancas {
-    color: #fff; /* madeira clara */
+    color: #f5e1b8; /* madeira clara */
+    text-shadow: 1px 1px 2px #5c3a21; /* sombra escura para destacar */
 }
 
 /* Peças pretas */
 .piece.pretas {
-    color: #000; /* madeira escura */
+    color: #5c3a21; /* madeira escura */
+    text-shadow: 1px 1px 2px #f5e1b8; /* sombra clara para destacar */
 }
-
-
