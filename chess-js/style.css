@@ -1,4 +1,4 @@
-/* style.css — v_2026 */
+/* style.css — v_2030 */
 
 body {
     display: flex;
@@ -109,6 +109,11 @@ h1 {
     background-color: yellow; /* fundo amarelo */
     border-radius: 50%;       /* opcional: deixa redondinho */
     padding: 2px;             /* dá um pequeno espaço */
+}
+
+/* Destaca a última casa movida pela IA */
+.last-move {
+    background-color: red !important;
 }
 
 
