@@ -49,22 +49,23 @@ body {
 .piece {
     display: inline-block;
     font-size: 40px;
-    line-height: 1.2;
+    line-height: 2;
 }
 
 /* Peças brancas - sempre visíveis */
 .piece.brancas {
     /*color: #f0d9b5;  madeira clara */
     color: #F0E8E5;
-    text-shadow: 1px 1px 1px #4b361f; /* sombra leve para contraste */
+    /*text-shadow: 1px 1px 1px #4b361f; /* sombra leve para contraste */
 }
 
 /* Peças pretas - sempre visíveis */
 .piece.pretas {
     /*color: #5c3a21;  madeira escura */
     color: #000000;
-    text-shadow: 1px 1px 1px #d9b48f; /* sombra leve para contraste */
+    /*text-shadow: 1px 1px 1px #d9b48f; /* sombra leve para contraste */
 }
+
 
 
 
