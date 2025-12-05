@@ -18,68 +18,53 @@ export class View {
     }
 
     render() {
-        console.log("Render iniciado");
-
+        // Limpa tabuleiro e labels
         this.boardDiv.innerHTML = '';
-        if (!this.board || !this.board.board) {
-            console.error("Board não definido ou inválido!", this.board);
-            return;
-        }
 
-        for (let i = 0; i < 64; i++) {
-            const row = Math.floor(i / 8);
-            const col = i % 8;
+        // Cria container para linhas e colunas
+        const rowsContainer = document.createElement('div');
+        rowsContainer.classList.add('rows-container');
 
-            const cell = document.createElement('div');
+        for (let row = 0; row < 8; row++) {
+            const rowDiv = document.createElement('div');
+            rowDiv.classList.add('row');
 
-            // Adiciona classe da célula
-            try {
+            // Label da linha
+            const rowLabel = document.createElement('div');
+            rowLabel.classList.add('row-label');
+            rowLabel.textContent = 8 - row;
+            rowDiv.appendChild(rowLabel);
+
+            for (let col = 0; col < 8; col++) {
+                const i = row * 8 + col;
+                const cell = document.createElement('div');
                 cell.classList.add('cell', (row + col) % 2 === 0 ? 'white' : 'black');
-            } catch (e) {
-                console.error("Erro ao adicionar classe na célula", i, e);
-            }
 
-            // Adiciona peça, se existir
-            try {
                 const piece = this.board.board[i];
-                if (piece) {
-                    cell.textContent = piece.tipo;
-                    console.log(`Peça na posição ${i}:`, piece.tipo);
-                }
-            } catch (e) {
-                console.error("Erro ao acessar peça na posição", i, e);
+                if (piece) cell.textContent = piece.tipo;
+
+                cell.dataset.index = i;
+                if (this.selected === i) cell.classList.add('selected');
+
+                rowDiv.appendChild(cell);
             }
-
-            cell.dataset.index = i;
-
-            if (this.selected === i) cell.classList.add('selected');
-
-            // Número na primeira coluna
-            if (col === 0) {
-                try {
-                    const numberLabel = document.createElement('span');
-                    numberLabel.textContent = 8 - row;
-                    cell.appendChild(numberLabel);
-                } catch (e) {
-                    console.error("Erro ao adicionar número na célula", i, e);
-                }
-            }
-
-            // Letra na última linha
-            if (row === 7) {
-                try {
-                    const letterLabel = document.createElement('span');
-                    letterLabel.textContent = String.fromCharCode(97 + col);
-                    cell.appendChild(letterLabel);
-                } catch (e) {
-                    console.error("Erro ao adicionar letra na célula", i, e);
-                }
-            }
-
-            this.boardDiv.appendChild(cell);
+            rowsContainer.appendChild(rowDiv);
         }
-        console.log("Render finalizado");
+
+        this.boardDiv.appendChild(rowsContainer);
+
+        // Letras abaixo do tabuleiro
+        const lettersDiv = document.createElement('div');
+        lettersDiv.classList.add('letters');
+        for (let col = 0; col < 8; col++) {
+            const letter = document.createElement('div');
+            letter.classList.add('letter');
+            letter.textContent = String.fromCharCode(97 + col);
+            lettersDiv.appendChild(letter);
+        }
+        this.boardDiv.appendChild(lettersDiv);
     }
+
     addClickHandlers() {
         this.boardDiv.addEventListener('click', e => {
             const target = e.target;
