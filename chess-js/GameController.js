@@ -46,7 +46,6 @@ export class GameController {
             snapshot[dest] = snapshot[from];
             snapshot[from] = null;
 
-            // Move temporário para simular a jogada
             const tempValidator = new MoveValidator(snapshot);
             return !tempValidator.isKingInCheck(piece.cor);
         });
@@ -71,6 +70,8 @@ export class GameController {
             setTimeout(() => {
                 this.ai.makeMove('pretas');
                 this.view.render();
+
+                // Alterna turno de volta para o jogador
                 this.currentTurn = 'brancas';
             }, 300);
         }
