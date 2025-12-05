@@ -20,41 +20,30 @@ export class View {
 
     render() {
         this.boardDiv.innerHTML = '';
-        this.numbersDiv.innerHTML = '';
-        this.lettersDiv.innerHTML = '';
 
-        // Preenche números das linhas (1-8)
-        for (let row = 0; row < 8; row++) {
-            const number = document.createElement('div');
-            number.classList.add('number');
-            number.textContent = 8 - row;
-            this.numbersDiv.appendChild(number);
-        }
-
-        // Preenche células do tabuleiro
         for (let i = 0; i < 64; i++) {
             const row = Math.floor(i / 8);
             const col = i % 8;
             const cell = document.createElement('div');
             cell.classList.add('cell', (row + col) % 2 === 0 ? 'white' : 'black');
 
+            // Adiciona número na primeira coluna
+            let label = '';
+            if (col === 0) label += 8 - row;
+
+            // Adiciona letra na última linha
+            if (row === 7) label += String.fromCharCode(97 + col);
+
             // Adiciona peça se houver
             const piece = this.board.board[i];
             if (piece) cell.textContent = piece.tipo;
+            else cell.textContent = label;
 
             cell.dataset.index = i;
 
             if (this.selected === i) cell.classList.add('selected');
 
             this.boardDiv.appendChild(cell);
-        }
-
-        // Preenche letras das colunas (a-h)
-        for (let col = 0; col < 8; col++) {
-            const letter = document.createElement('div');
-            letter.classList.add('letter');
-            letter.textContent = String.fromCharCode(97 + col);
-            this.lettersDiv.appendChild(letter);
         }
     }
 
