@@ -5,7 +5,7 @@ export class View {
 
         this.selected = null;
 
-        // Criar div do tabuleiro
+        // Cria div do tabuleiro
         this.boardDiv = document.createElement('div');
         this.boardDiv.id = 'chessboard';
         document.body.appendChild(this.boardDiv);
@@ -51,22 +51,28 @@ export class View {
 
             const index = parseInt(target.dataset.index);
 
-            // Selecionar peça branca
+            // Se nenhuma peça está selecionada ainda
             if (this.selected === null) {
                 if (this.board.board[index] && this.board.board[index].cor === 'brancas') {
-                    this.selected = index;
+                    this.selected = index; // seleciona a peça
                 }
             } 
-            // Mover peça
+            // Se já existe uma peça selecionada
             else {
-                const moved = this.controller.movePiece(this.selected, index);
-                if (moved) {
-                    // Apenas limpar a seleção, IA é chamada pelo GameController
+                // Clicou na mesma célula? apenas deseleciona
+                if (index === this.selected) {
                     this.selected = null;
+                } 
+                // Caso contrário, tenta mover
+                else {
+                    const moved = this.controller.movePiece(this.selected, index);
+                    if (moved) {
+                        this.selected = null; // limpa seleção apenas se o movimento foi feito
+                    }
                 }
             }
 
-            // Renderiza sempre após qualquer clique
+            // Sempre renderiza após o clique
             this.render();
         });
     }
