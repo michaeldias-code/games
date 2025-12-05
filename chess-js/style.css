@@ -1,4 +1,4 @@
-/* style.css — v_2010 */
+/* style.css — v_2018 */
 
 body {
     display: flex;
@@ -87,5 +87,20 @@ h1 {
 .piece.pretas {
     color: #000000;
     text-shadow: 1px 1px 2px white;
+}
+
+.game-over-message {
+    position: fixed;        /* fixa na tela */
+    bottom: 20px;           /* distância da parte inferior */
+    left: 50%;              /* move o ponto de referência para o centro horizontal */
+    transform: translateX(-50%); /* centraliza horizontalmente */
+    font-size: 24px;
+    font-weight: bold;
+    color: red;
+    background-color: rgba(255, 255, 255, 0.9); /* opcional: fundo semi-transparente */
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-align: center;
+    z-index: 100;           /* garante que fique acima de outros elementos */
 }
 
