@@ -1,7 +1,7 @@
 // MoveValidator.js
 export class MoveValidator {
     constructor(boardArray) {
-        this.board = boardArray; // recebe direto o array de 64 posições
+        this.board = boardArray; // RECEBE DIRETO O ARRAY DE 64 CASAS
         console.log('MoveValidator carregado!');
     }
 
@@ -9,8 +9,7 @@ export class MoveValidator {
         return pos >= 0 && pos < 64;
     }
 
-    // --- MOVIMENTOS BRUTOS: NÃO CHECADO SE DEIXA O REI EM XEQUE ---
-    getRawMoves(pos) {
+    getPossibleMoves(pos) {
         const piece = this.board[pos];
         if (!piece) return [];
 
@@ -26,15 +25,18 @@ export class MoveValidator {
 
         switch(piece.tipo) {
             case '♙': // Peão branco
+                // Avanço simples
                 if (row > 0 && !this.board[pos - 8]) moves.push(pos - 8);
-                if (row === 6 && !this.board[pos - 16] && !this.board[pos - 8]) moves.push(pos - 16);
+                // Avanço duplo inicial
+                if (row === 6 && !this.board[pos - 8] && !this.board[pos - 16]) moves.push(pos - 16);
+                // Capturas diagonais
                 if (col > 0 && this.board[pos - 9] && this.board[pos - 9].cor === 'pretas') moves.push(pos - 9);
                 if (col < 7 && this.board[pos - 7] && this.board[pos - 7].cor === 'pretas') moves.push(pos - 7);
                 break;
 
             case '♟': // Peão preto
                 if (row < 7 && !this.board[pos + 8]) moves.push(pos + 8);
-                if (row === 1 && !this.board[pos + 16] && !this.board[pos + 8]) moves.push(pos + 16);
+                if (row === 1 && !this.board[pos + 8] && !this.board[pos + 16]) moves.push(pos + 16);
                 if (col < 7 && this.board[pos + 9] && this.board[pos + 9].cor === 'brancas') moves.push(pos + 9);
                 if (col > 0 && this.board[pos + 7] && this.board[pos + 7].cor === 'brancas') moves.push(pos + 7);
                 break;
@@ -60,7 +62,8 @@ export class MoveValidator {
                 break;
         }
 
-        return moves;
+        // Filtra movimentos que deixam o próprio rei em xeque
+        return moves.filter(to => this.wouldNotLeaveKingInCheck(pos, to));
     }
 
     getSlidingMoves(pos, directions) {
@@ -91,40 +94,18 @@ export class MoveValidator {
 
         if (offset === -1 || offset === 1) return startRow === endRow;
         if (offset === -8 || offset === 8) return true;
-        if ([-9,7,-7,9].includes(offset)) return Math.abs(endCol - startCol) === Math.abs(endRow - startRow);
+        if (offset === -9 || offset === 7) return Math.abs(endCol - startCol) === Math.abs(endRow - startRow);
+        if (offset === -7 || offset === 9) return Math.abs(endCol - startCol) === Math.abs(endRow - startRow);
         return false;
     }
 
-    // --- MOVIMENTOS VÁLIDOS: FILTRA MOVIMENTOS QUE DEIXARIAM O REI EM XEQUE ---
-    getPossibleMoves(pos) {
-        const piece = this.board[pos];
-        if (!piece) return [];
-
-        const rawMoves = this.getRawMoves(pos);
-        const safeMoves = [];
-
-        for (let to of rawMoves) {
-            const snapshot = this.board.slice();
-            this.board[to] = piece;
-            this.board[pos] = null;
-
-            if (!this.isKingInCheck(piece.cor)) safeMoves.push(to);
-
-            this.board = snapshot;
-        }
-
-        return safeMoves;
-    }
-
     movePiece(from, to) {
-        const piece = this.board[from];
         const possible = this.getPossibleMoves(from);
         if (!possible.includes(to)) {
             console.log(`Movimento inválido: ${from} -> ${to}`);
             return false;
         }
-
-        this.board[to] = piece;
+        this.board[to] = this.board[from];
         this.board[from] = null;
         return true;
     }
@@ -136,12 +117,58 @@ export class MoveValidator {
         for (let i = 0; i < 64; i++) {
             const p = this.board[i];
             if (p && p.cor !== color) {
-                const enemyMoves = this.getRawMoves(i); // usa apenas rawMoves
-                if (enemyMoves.includes(kingPos)) return true;
+                const moves = this.getPossibleMovesWithoutCheckFilter(i);
+                if (moves.includes(kingPos)) return true;
             }
         }
-
         return false;
+    }
+
+    // Auxiliar para evitar recursão infinita
+    getPossibleMovesWithoutCheckFilter(pos) {
+        const piece = this.board[pos];
+        if (!piece) return [];
+
+        const moves = [];
+        const addMove = (to) => {
+            if (!this.isValidPosition(to)) return;
+            const target = this.board[to];
+            if (!target || target.cor !== piece.cor) moves.push(to);
+        };
+
+        const row = Math.floor(pos / 8);
+        const col = pos % 8;
+
+        switch(piece.tipo) {
+            case '♙':
+                if (row > 0 && !this.board[pos - 8]) moves.push(pos - 8);
+                if (row === 6 && !this.board[pos - 8] && !this.board[pos - 16]) moves.push(pos - 16);
+                if (col > 0 && this.board[pos - 9] && this.board[pos - 9].cor === 'pretas') moves.push(pos - 9);
+                if (col < 7 && this.board[pos - 7] && this.board[pos - 7].cor === 'pretas') moves.push(pos - 7);
+                break;
+            case '♟':
+                if (row < 7 && !this.board[pos + 8]) moves.push(pos + 8);
+                if (row === 1 && !this.board[pos + 8] && !this.board[pos + 16]) moves.push(pos + 16);
+                if (col < 7 && this.board[pos + 9] && this.board[pos + 9].cor === 'brancas') moves.push(pos + 9);
+                if (col > 0 && this.board[pos + 7] && this.board[pos + 7].cor === 'brancas') moves.push(pos + 7);
+                break;
+            case '♖': case '♜': moves.push(...this.getSlidingMoves(pos, [-1,1,-8,8])); break;
+            case '♗': case '♝': moves.push(...this.getSlidingMoves(pos, [-9,-7,7,9])); break;
+            case '♕': case '♛': moves.push(...this.getSlidingMoves(pos, [-1,1,-8,8,-9,-7,7,9])); break;
+            case '♘': case '♞': [-17,-15,-10,-6,6,10,15,17].forEach(o => addMove(pos + o)); break;
+            case '♔': case '♚': [-9,-8,-7,-1,1,7,8,9].forEach(o => addMove(pos + o)); break;
+        }
+
+        return moves;
+    }
+
+    wouldNotLeaveKingInCheck(from, to) {
+        const snapshot = this.board.slice();
+        this.board[to] = this.board[from];
+        this.board[from] = null;
+        const inCheck = this.isKingInCheck(this.board[to].cor);
+        this.board = snapshot;
+        return !inCheck;
     }
 
     isCheckmate(color) {
