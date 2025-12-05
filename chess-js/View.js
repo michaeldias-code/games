@@ -76,10 +76,28 @@ export class View {
             this.render();
         });
     }
-    showGameOver(message) {
+    // recebe dados do Controller e decide o que mostrar
+    onGameOver({ winner, reason }) {
+        let message = '';
+
+        switch(reason) {
+            case 'checkmate':
+                message = `${winner} venceu por checkmate!`;
+                break;
+            case 'stalemate':
+                message = 'Empate por afogamento!';
+                break;
+            default:
+                message = 'Fim de jogo!';
+        }
+
+        this.showMessage(message);
+    }
+
+    showMessage(text) {
         const div = document.createElement('div');
         div.classList.add('game-over-message');
-        div.textContent = message;
+        div.textContent = text;
         document.body.appendChild(div);
     }
 }
