@@ -62,9 +62,6 @@ export class View {
                 // Data index para clique
                 cell.dataset.index = i;
 
-                // Destaca a última casa que a IA moveu
-                if (i === this.lastMoveTo) cell.classList.add('last-move');
-
                 // Peça
                 const piece = this.board.board[i];
                 if (piece) {
