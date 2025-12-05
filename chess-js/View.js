@@ -1,4 +1,4 @@
-// View.js _v6
+// View.js _v7
 export class View {
     constructor(board, controller) {
         this.board = board;
@@ -30,46 +30,48 @@ export class View {
     }
 
     render() {
-        // Limpa tudo
         this.boardDiv.innerHTML = '';
-        this.numbersDiv.innerHTML = '';
-        this.lettersDiv.innerHTML = '';
 
-        // Números (8-1)
-        for (let i = 8; i >= 1; i--) {
-            const div = document.createElement('div');
-            div.textContent = i;
-            div.classList.add('number-label');
-            this.numbersDiv.appendChild(div);
-        }
+        for (let row = 0; row < 8; row++) {
+            for (let col = 0; col < 8; col++) {
+                const i = row * 8 + col;
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
 
-        // Letras (a-h)
-        for (let i = 0; i < 8; i++) {
-            const div = document.createElement('div');
-            div.textContent = String.fromCharCode(97 + i);
-            div.classList.add('letter-label');
-            this.lettersDiv.appendChild(div);
-        }
+                // Alterna cor da célula
+                if ((row + col) % 2 === 0) {
+                    cell.classList.add('white');
+                } else {
+                    cell.classList.add('black');
+                }
 
-        // Tabuleiro 8x8
-        for (let i = 0; i < 64; i++) {
-            const row = Math.floor(i / 8);
-            const col = i % 8;
-            const cell = document.createElement('div');
-            cell.classList.add('cell');
-            cell.classList.add((row + col) % 2 === 0 ? 'white' : 'black');
+                // Adiciona peça, se existir
+                const piece = this.board.board[i];
+                if (piece) {
+                    cell.textContent = piece.tipo;
+                }
 
-            // Adiciona peça
-            const piece = this.board.board[i];
-            if (piece) {
-                cell.textContent = piece.tipo;
+                // Seleção
+                if (this.selected === i) cell.classList.add('selected');
+
+                // Números na primeira coluna (à esquerda)
+                if (col === 0) {
+                    const numberLabel = document.createElement('span');
+                    numberLabel.textContent = 8 - row;
+                    numberLabel.classList.add('number-label');
+                    cell.appendChild(numberLabel);
+                }
+
+                // Letras na última linha
+                if (row === 7) {
+                    const letterLabel = document.createElement('span');
+                    letterLabel.textContent = String.fromCharCode(97 + col);
+                    letterLabel.classList.add('letter-label');
+                    cell.appendChild(letterLabel);
+                }
+
+                this.boardDiv.appendChild(cell);
             }
-
-            cell.dataset.index = i;
-
-            if (this.selected === i) cell.classList.add('selected');
-
-            this.boardDiv.appendChild(cell);
         }
     }
 
