@@ -1,3 +1,4 @@
+//MoveValidator v2007
 export class MoveValidator {
     constructor(boardArray) {
         this.board = boardArray; // RECEBE DIRETO O ARRAY DE 64 CASAS
@@ -13,22 +14,19 @@ export class MoveValidator {
         if (!piece) return [];
 
         const moves = [];
+        const row = Math.floor(pos / 8);
+        const col = pos % 8;
+
         const addMove = (to) => {
             if (!this.isValidPosition(to)) return;
             const target = this.board[to];
             if (!target || target.cor !== piece.cor) moves.push(to);
         };
 
-        const row = Math.floor(pos / 8);
-        const col = pos % 8;
-
         switch(piece.tipo) {
             case '♙': // Peão branco
-                // Avanço simples
                 if (row > 0 && !this.board[pos - 8]) moves.push(pos - 8);
-                // Avanço duplo inicial
                 if (row === 6 && !this.board[pos - 8] && !this.board[pos - 16]) moves.push(pos - 16);
-                // Capturas diagonais
                 if (col > 0 && this.board[pos - 9] && this.board[pos - 9].cor === 'pretas') moves.push(pos - 9);
                 if (col < 7 && this.board[pos - 7] && this.board[pos - 7].cor === 'pretas') moves.push(pos - 7);
                 break;
@@ -53,15 +51,44 @@ export class MoveValidator {
                 break;
 
             case '♘': case '♞': // Cavalo
-                [-17,-15,-10,-6,6,10,15,17].forEach(o => addMove(pos + o));
+                const knightOffsets = [-17,-15,-10,-6,6,10,15,17];
+                knightOffsets.forEach(o => {
+                    const to = pos + o;
+                    if (!this.isValidPosition(to)) return;
+
+                    const toRow = Math.floor(to / 8);
+                    const toCol = to % 8;
+
+                    const rowDiff = Math.abs(toRow - row);
+                    const colDiff = Math.abs(toCol - col);
+
+                    if ((rowDiff === 2 && colDiff === 1) || (rowDiff === 1 && colDiff === 2)) {
+                        const target = this.board[to];
+                        if (!target || target.cor !== piece.cor) moves.push(to);
+                    }
+                });
                 break;
 
             case '♔': case '♚': // Rei
-                [-9,-8,-7,-1,1,7,8,9].forEach(o => addMove(pos + o));
-                break;
-        }
+                const kingOffsets = [-9,-8,-7,-1,1,7,8,9];
+                kingOffsets.forEach(o => {
+                    const to = pos + o;
+                    if (!this.isValidPosition(to)) return;
 
-        // Filtra os movimentos que colocariam o rei em xeque
+                    const toRow = Math.floor(to / 8);
+                    const toCol = to % 8;
+
+                    const rowDiff = Math.abs(toRow - row);
+                    const colDiff = Math.abs(toCol - col);
+
+                    if (rowDiff <= 1 && colDiff <= 1) {
+                        const target = this.board[to];
+                    if (!target || target.cor !== piece.cor) moves.push(to);
+                }
+            });
+            break;
+        }
+        // Filtra movimentos que deixariam o rei em xeque
         return moves.filter(to => this.wouldNotLeaveKingInCheck(pos, to));
     }
 
@@ -198,3 +225,4 @@ export class MoveValidator {
         return true;
     }
 }
+
