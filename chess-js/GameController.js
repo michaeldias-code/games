@@ -76,7 +76,7 @@ export class GameController {
                 console.log(`Xeque-mate! ${piece.cor} venceu!`);
                 this.gameOver = true; // Finaliza o jogo
                 this.view.onGameOver({
-                    winner: this.currentTurn
+                    winner: this.currentTurn,
                     reason: 'checkmate'
                 });                      
             }
@@ -96,7 +96,7 @@ export class GameController {
                         console.log(`Xeque-mate! Pretas venceram!`);
                         this.gameOver = true; // Finaliza o jogo
                         this.view.onGameOver({
-                            winner: this.currentTurn
+                            winner: this.currentTurn,
                             reason: 'checkmate'
                         });                      
                     }
