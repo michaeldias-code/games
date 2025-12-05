@@ -1,4 +1,4 @@
-/* style.css - definitivo para hoje */
+/* style.css _v2 */
 body {
     display: flex;
     justify-content: center;
@@ -8,6 +8,33 @@ body {
     margin: 0;
     padding: 20px;
     background-color: #f0f0f0;
+}
+
+/* Container do tabuleiro e labels */
+#chessboard-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+/* Números à esquerda das linhas */
+#numbers {
+    position: absolute;
+    top: 0;
+    left: -25px; /* espaço à esquerda do tabuleiro */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 480px; /* 8 * 60px */
+}
+
+.number {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
 }
 
 /* Tabuleiro */
@@ -29,44 +56,35 @@ body {
     box-sizing: border-box;
 }
 
-/* Casas claras/escuras com contraste definitivo */
-.white {
-    /* background-color: #d9b48f; madeira clara */
-    background-color: #FFFFFF;
-}
-
-.black {
-   /* background-color: #4b361f;  madeira escura */
-    background-color: #808080;
-}
+/* Cores das casas */
+.white { background-color: #FFFFFF; }
+.black { background-color: #808080; }
 
 /* Seleção de peça */
-.selected {
-    outline: 3px solid yellow;
+.selected { outline: 3px solid yellow; }
+
+/* Letras abaixo do tabuleiro */
+#letters {
+    display: flex;
+    justify-content: space-between;
+    width: 480px; /* 8 * 60px */
+    margin-top: 5px;
 }
 
-/* Peças */
-.piece {
-    display: inline-block;
-    font-size: 40px;
-    line-height: 2;
+.letter {
+    width: 60px;
+    text-align: center;
+    font-weight: bold;
 }
 
-/* Peças brancas - sempre visíveis */
-.piece.brancas {
-    /*color: #f0d9b5;  madeira clara */
-    color: #F0E8E5;
-    /*text-shadow: 1px 1px 1px #4b361f; /* sombra leve para contraste */
+/* Mensagem de fim de jogo */
+.game-over-message {
+    margin-top: 20px;
+    font-size: 24px;
+    font-weight: bold;
+    color: red;
 }
 
-/* Peças pretas - sempre visíveis */
-.piece.pretas {
-    /*color: #5c3a21;  madeira escura */
-    color: #000000;
-    /*text-shadow: 1px 1px 1px #d9b48f; /* sombra leve para contraste */
-}
-
-
-
-
-
+/* Peças (se usar classe .piece) */
+.piece.brancas { color: #F0E8E5; }
+.piece.pretas { color: #000000; }
