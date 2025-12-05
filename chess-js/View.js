@@ -24,8 +24,11 @@ export class View {
             const cell = document.createElement('div');
             cell.classList.add('cell');
 
+            const row = Math.floor(i / 8);
+            const col = i % 8;
+
             // Alterna cor da célula
-            if ((Math.floor(i / 8) + i) % 2 === 0) {
+            if ((row + col) % 2 === 0) {
                 cell.classList.add('white');
             } else {
                 cell.classList.add('black');
@@ -40,6 +43,18 @@ export class View {
             // Destacar célula selecionada
             if (this.selected === i) cell.classList.add('selected');
 
+            // Número na primeira coluna
+            if (col === 0) {
+                const numberLabel = document.createElement('span');
+                numberLabel.textContent = 8 - row; // 8->1
+                cell.appendChild(numberLabel);
+            }
+            // Letra na última linha
+            if (row === 7) {
+                const letterLabel = document.createElement('span');
+                letterLabel.textContent = String.fromCharCode(97 + col); // a->h
+                cell.appendChild(letterLabel);
+            }
             this.boardDiv.appendChild(cell);
         }
     }
