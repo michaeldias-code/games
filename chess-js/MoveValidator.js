@@ -62,7 +62,7 @@ export class MoveValidator {
                 break;
         }
 
-        // Filtra movimentos que deixam o próprio rei em xeque
+        // Filtra os movimentos que colocariam o rei em xeque
         return moves.filter(to => this.wouldNotLeaveKingInCheck(pos, to));
     }
 
