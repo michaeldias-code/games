@@ -19,51 +19,43 @@ export class View {
     }
 
     render() {
-        // Limpa tabuleiro e labels
         this.boardDiv.innerHTML = '';
+        this.numbersDiv.innerHTML = '';
+        this.lettersDiv.innerHTML = '';
 
-        // Cria container para linhas e colunas
-        const rowsContainer = document.createElement('div');
-        rowsContainer.classList.add('rows-container');
-
+        // Preenche números das linhas (1-8)
         for (let row = 0; row < 8; row++) {
-            const rowDiv = document.createElement('div');
-            rowDiv.classList.add('row');
-
-            // Label da linha
-            const rowLabel = document.createElement('div');
-            rowLabel.classList.add('row-label');
-            rowLabel.textContent = 8 - row;
-            rowDiv.appendChild(rowLabel);
-
-            for (let col = 0; col < 8; col++) {
-                const i = row * 8 + col;
-                const cell = document.createElement('div');
-                cell.classList.add('cell', (row + col) % 2 === 0 ? 'white' : 'black');
-
-                const piece = this.board.board[i];
-                if (piece) cell.textContent = piece.tipo;
-
-                cell.dataset.index = i;
-                if (this.selected === i) cell.classList.add('selected');
-
-                rowDiv.appendChild(cell);
-            }
-            rowsContainer.appendChild(rowDiv);
+            const number = document.createElement('div');
+            number.classList.add('number');
+            number.textContent = 8 - row;
+            this.numbersDiv.appendChild(number);
         }
 
-        this.boardDiv.appendChild(rowsContainer);
+        // Preenche células do tabuleiro
+        for (let i = 0; i < 64; i++) {
+            const row = Math.floor(i / 8);
+            const col = i % 8;
+            const cell = document.createElement('div');
+            cell.classList.add('cell', (row + col) % 2 === 0 ? 'white' : 'black');
 
-        // Letras abaixo do tabuleiro
-        const lettersDiv = document.createElement('div');
-        lettersDiv.classList.add('letters');
+            // Adiciona peça se houver
+            const piece = this.board.board[i];
+            if (piece) cell.textContent = piece.tipo;
+
+            cell.dataset.index = i;
+
+            if (this.selected === i) cell.classList.add('selected');
+
+            this.boardDiv.appendChild(cell);
+        }
+
+        // Preenche letras das colunas (a-h)
         for (let col = 0; col < 8; col++) {
             const letter = document.createElement('div');
             letter.classList.add('letter');
             letter.textContent = String.fromCharCode(97 + col);
-            lettersDiv.appendChild(letter);
+            this.lettersDiv.appendChild(letter);
         }
-        this.boardDiv.appendChild(lettersDiv);
     }
 
     addClickHandlers() {
