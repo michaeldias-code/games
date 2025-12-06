@@ -68,6 +68,11 @@ export class View {
                     span.className = `piece ${piece.cor}`;
                     cell.appendChild(span);
                 }
+                 // Destacar peça selecionada
+                if (this.selected === i) cell.classList.add("selected");
+
+                // Destacar última casa da IA
+                if (this.lastMoveTo === i) cell.classList.add("last-move");
 
                 this.boardDiv.appendChild(cell);
             }
