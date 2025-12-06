@@ -104,12 +104,18 @@ h1 {
     z-index: 1000;          /* garante que fique acima de todos */
 }
 
-
 /* Destaque para célula selecionada */
 .selected {
     outline: 3px solid yellow; /* contorno amarelo */
     outline-offset: -2px;       /* opcional: ajusta posição do contorno */
 }
+
+/* Último movimento da IA */
+.last-move {
+    outline: 3px solid red; /* contorno vermelho */
+    outline-offset: -2px;
+}
+
 
 
 
