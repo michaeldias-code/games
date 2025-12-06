@@ -86,9 +86,6 @@ export class GameController {
         if (this.currentTurn === 'pretas') {
             setTimeout(() => {
                 this.ai.makeMove('pretas');
-                // Antes de renderizar
-                this.lastMoveTo = m.to; // salvar posição destino do último movimento da IA
-
                 this.view.render(); // Renderiza novamente após o movimento da IA
                 this.currentTurn = 'brancas'; // Alterna para as brancas
 
