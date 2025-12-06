@@ -1,32 +1,33 @@
-/* style.css — v_2030 */
+/* style.css — v1 */
 
+/* Corpo da página */
 body {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    justify-content: flex-start;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
     margin: 0;
-    background: #ddd;
+    background: #fff;
     font-family: Arial, sans-serif;
 }
-/* h1 centralizado no topo */
+
+/* Título centralizado acima do tabuleiro */
 h1 {
-    position: absolute; /* fixa no topo da página */
-    top: 20px;          /* distância do topo */
-    left: 50%;          /* move o ponto de referência para o centro horizontal */
-    transform: translateX(-50%); /* centraliza horizontalmente */
-    font-size: 32px;
-    font-weight: bold;
+    margin: 15px 0;
+    font-size: clamp(1.5em, 4vw, 2.5em);
     color: #333;
-    margin: 0; /* remove margem padrão do h1 */
-}
-#chessboard-wrapper {
-    position: relative;
-    width: 480px;
-    height: 480px;
+    text-align: center;
 }
 
-/* Grade do tabuleiro */
+/* Wrapper do tabuleiro */
+#chessboard-wrapper {
+    position: relative;
+    width: 90vmin;
+    height: 90vmin;
+}
+
+/* Tabuleiro */
 #chessboard {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
@@ -34,6 +35,7 @@ h1 {
     width: 100%;
     height: 100%;
     border: 3px solid #000;
+    box-shadow: 0 0 10px #000;
 }
 
 /* Células */
@@ -41,42 +43,54 @@ h1 {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 42px;
+    aspect-ratio: 1 / 1;   /* força quadrado perfeito */
+    width: 100%;            /* garante ocupar a célula da grid */
+    height: 100%;           /* garante ocupar a célula da grid */
+    font-size: 4.5vmin;     /* ou calc da célula, mas fixo */
     user-select: none;
 }
 
-.white {
-    background: #f0d9b5;
+.white { background: #f0d9b5; }
+.black { background: #b58863; }
+
+/* Seleção da peça */
+.selected {
+    outline: 3px solid yellow;
+    outline-offset: -2px;
 }
 
-.black {
-    background: #b58863;
+/* Destaque do último movimento */
+.ai-move {
+    background-color: rgba(255, 255, 0, 0.5); /* amarelo semi-transparente */
+    transition: background-color 0.3s ease;
 }
 
 /* Notações externas */
 .file-label,
 .rank-label {
     position: absolute;
-    color: #000a;
-    font-size: 14px;
     font-weight: bold;
     pointer-events: none;
+    font-size: calc(80vmin * 0.04);
+    color: #000;
 }
 
 /* Letras (a–h) embaixo */
 .file-label {
-    bottom: -20px;
+    bottom: -8%;
+    transform: translateX(-50%);
 }
 
 /* Números (1–8) à esquerda */
 .rank-label {
-    left: -20px;
+    left: -4%;
+    transform: translateY(50%);
 }
 
 /* Peças */
 .piece {
-    font-size: 42px;
     pointer-events: none;
+    font-size: calc(80vmin / 10);
 }
 
 .piece.brancas {
@@ -89,24 +103,36 @@ h1 {
     text-shadow: 1px 1px 2px white;
 }
 
+/* Mensagem de fim de jogo */
 .game-over-message {
     position: fixed;
-    bottom: 20px;           /* distância da parte inferior */
-    left: 50%;              /* move o ponto de referência para o centro horizontal */
-    transform: translateX(-50%); /* centraliza horizontalmente */
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
     font-size: 24px;
     font-weight: bold;
     color: red;
-    background-color: rgba(255, 255, 255, 0.9); /* fundo semi-transparente */
+    background-color: rgba(255, 255, 255, 0.9);
     padding: 10px 20px;
     border-radius: 8px;
     text-align: center;
-    z-index: 1000;          /* garante que fique acima de todos */
+    z-index: 1000;
 }
 
-/* Destaque para célula selecionada */
-.selected {
-    outline: 3px solid yellow; /* contorno amarelo */
-    outline-offset: -2px;       /* opcional: ajusta posição do contorno */
+/* Ajustes finos para celular */
+@media (max-width: 600px) {
+    #chessboard-wrapper {
+        width: 90vmin;
+        height: 90vmin;
+    }
+
+    .cell {
+        font-size: calc(90vmin / 10);
+    }
+
+    .file-label { bottom: -5%; }
+    .rank-label { left: -3%; }
 }
+
+
 
