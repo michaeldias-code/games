@@ -110,16 +110,3 @@ h1 {
     outline-offset: -2px;       /* opcional: ajusta posição do contorno */
 }
 
-/* Último movimento da IA */
-.last-move {
-    outline: 3px solid red; /* contorno vermelho */
-    outline-offset: -2px;
-}
-
-
-
-
-
-
-
-
