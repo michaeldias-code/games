@@ -1,200 +1,213 @@
-//MoveValidator v2007
+// MoveValidator.js — v1
 export class MoveValidator {
+
     constructor(boardArray) {
-        this.board = boardArray; // RECEBE DIRETO O ARRAY DE 64 CASAS
-        console.log('MoveValidator carregado!');
+        this.board = boardArray;
+        console.log("MoveValidator carregado!");
     }
 
+    // ---------------------------------------
+    // Regras básicas
+    // ---------------------------------------
     isValidPosition(pos) {
         return pos >= 0 && pos < 64;
     }
 
-    getPossibleMoves(pos) {
-        const piece = this.board[pos];
-        if (!piece) return [];
+    row(pos) { return Math.floor(pos / 8); }
+    col(pos) { return pos % 8; }
 
-        const moves = [];
-        const row = Math.floor(pos / 8);
-        const col = pos % 8;
+    sameRow(a, b) { return this.row(a) === this.row(b); }
+    sameCol(a, b) { return this.col(a) === this.col(b); }
 
-        const addMove = (to) => {
-            if (!this.isValidPosition(to)) return;
-            const target = this.board[to];
-            if (!target || target.cor !== piece.cor) moves.push(to);
-        };
+    // ---------------------------------------
+    // CHECA SE MOVIMENTO DESLIZANTE QUEBRA BORDAS
+    // ---------------------------------------
+    slidingStepOk(start, next, offset) {
+        const sr = this.row(start);
+        const sc = this.col(start);
+        const nr = this.row(next);
+        const nc = this.col(next);
 
-        switch(piece.tipo) {
-            case '♙': // Peão branco
-                if (row > 0 && !this.board[pos - 8]) moves.push(pos - 8);
-                if (row === 6 && !this.board[pos - 8] && !this.board[pos - 16]) moves.push(pos - 16);
-                if (col > 0 && this.board[pos - 9] && this.board[pos - 9].cor === 'pretas') moves.push(pos - 9);
-                if (col < 7 && this.board[pos - 7] && this.board[pos - 7].cor === 'pretas') moves.push(pos - 7);
-                break;
+        switch (offset) {
+            case -1: return nr === sr && nc === sc - 1;
+            case 1: return nr === sr && nc === sc + 1;
 
-            case '♟': // Peão preto
-                if (row < 7 && !this.board[pos + 8]) moves.push(pos + 8);
-                if (row === 1 && !this.board[pos + 8] && !this.board[pos + 16]) moves.push(pos + 16);
-                if (col < 7 && this.board[pos + 9] && this.board[pos + 9].cor === 'brancas') moves.push(pos + 9);
-                if (col > 0 && this.board[pos + 7] && this.board[pos + 7].cor === 'brancas') moves.push(pos + 7);
-                break;
+            case -8: return nc === sc && nr === sr - 1;
+            case 8: return nc === sc && nr === sr + 1;
 
-            case '♖': case '♜': // Torre
-                moves.push(...this.getSlidingMoves(pos, [-1,1,-8,8]));
-                break;
+            case -9: return (nr === sr - 1) && (nc === sc - 1);
+            case -7: return (nr === sr - 1) && (nc === sc + 1);
+            case 7: return (nr === sr + 1) && (nc === sc - 1);
+            case 9: return (nr === sr + 1) && (nc === sc + 1);
 
-            case '♗': case '♝': // Bispo
-                moves.push(...this.getSlidingMoves(pos, [-9,-7,7,9]));
-                break;
-
-            case '♕': case '♛': // Rainha
-                moves.push(...this.getSlidingMoves(pos, [-1,1,-8,8,-9,-7,7,9]));
-                break;
-
-            case '♘': case '♞': // Cavalo
-                const knightOffsets = [-17,-15,-10,-6,6,10,15,17];
-                knightOffsets.forEach(o => {
-                    const to = pos + o;
-                    if (!this.isValidPosition(to)) return;
-
-                    const toRow = Math.floor(to / 8);
-                    const toCol = to % 8;
-
-                    const rowDiff = Math.abs(toRow - row);
-                    const colDiff = Math.abs(toCol - col);
-
-                    if ((rowDiff === 2 && colDiff === 1) || (rowDiff === 1 && colDiff === 2)) {
-                        const target = this.board[to];
-                        if (!target || target.cor !== piece.cor) moves.push(to);
-                    }
-                });
-                break;
-
-            case '♔': case '♚': // Rei
-                const kingOffsets = [-9,-8,-7,-1,1,7,8,9];
-                kingOffsets.forEach(o => {
-                    const to = pos + o;
-                    if (!this.isValidPosition(to)) return;
-
-                    const toRow = Math.floor(to / 8);
-                    const toCol = to % 8;
-
-                    const rowDiff = Math.abs(toRow - row);
-                    const colDiff = Math.abs(toCol - col);
-
-                    if (rowDiff <= 1 && colDiff <= 1) {
-                        const target = this.board[to];
-                    if (!target || target.cor !== piece.cor) moves.push(to);
-                }
-            });
-            break;
+            default: return false;
         }
-        // Filtra movimentos que deixariam o rei em xeque
-        return moves.filter(to => this.wouldNotLeaveKingInCheck(pos, to));
     }
 
+    // ---------------------------------------
+    // MOVIMENTOS DESLIZANTES
+    // ---------------------------------------
     getSlidingMoves(pos, directions) {
         const moves = [];
         const piece = this.board[pos];
 
-        directions.forEach(d => {
+        for (let d of directions) {
             let p = pos + d;
-            while (this.isValidPosition(p) && this.isInSameLineOrCol(pos, p, d)) {
+
+            while (this.isValidPosition(p) && this.slidingStepOk(p - d, p, d)) {
+
                 const target = this.board[p];
-                if (!target) moves.push(p);
-                else {
+
+                if (!target) {
+                    moves.push(p);
+                } else {
                     if (target.cor !== piece.cor) moves.push(p);
                     break;
                 }
+
                 p += d;
             }
-        });
+        }
 
         return moves;
     }
 
-    isInSameLineOrCol(start, end, offset) {
-        const startRow = Math.floor(start / 8);
-        const startCol = start % 8;
-        const endRow = Math.floor(end / 8);
-        const endCol = end % 8;
-
-        if (offset === -1 || offset === 1) return startRow === endRow;
-        if (offset === -8 || offset === 8) return true;
-        if (offset === -9 || offset === 7) return Math.abs(endCol - startCol) === Math.abs(endRow - startRow);
-        if (offset === -7 || offset === 9) return Math.abs(endCol - startCol) === Math.abs(endRow - startRow);
-        return false;
-    }
-
-    wouldNotLeaveKingInCheck(from, to) {
-        const originalPiece = this.board[from]; // A peça original da posição de origem
-        const targetPiece = this.board[to];     // A peça que está no destino
-
-        // Realiza o movimento "temporário"
-        this.board[to] = originalPiece;
-        this.board[from] = null;
-
-        // Verifica se o rei do jogador que está movendo ficaria em xeque
-        const inCheck = this.isKingInCheck(originalPiece.cor);
-
-        // Restaura a posição original do tabuleiro
-        this.board[from] = originalPiece;
-        this.board[to] = targetPiece;
-
-        // Retorna se o movimento não colocaria o rei em xeque
-        return !inCheck;
-    }
-
-    isKingInCheck(color) {
-        const kingPos = this.board.findIndex(p => p && ((p.tipo === '♔' && p.cor === color) || (p.tipo === '♚' && p.cor === color)));
-        if (kingPos === -1) return false;
-
-        for (let i = 0; i < 64; i++) {
-            const p = this.board[i];
-            if (p && p.cor !== color) {
-                const moves = this.getPossibleMovesWithoutCheckFilter(i);
-                if (moves.includes(kingPos)) return true;
-            }
-        }
-        return false;
-    }
-
-    getPossibleMovesWithoutCheckFilter(pos) {
+    // ---------------------------------------
+    // MOVIMENTOS DE UMA PEÇA (SEM FILTRO DE XEQUE)
+    // ---------------------------------------
+    rawMoves(pos) {
         const piece = this.board[pos];
         if (!piece) return [];
 
         const moves = [];
-        const addMove = (to) => {
+        const r = this.row(pos);
+        const c = this.col(pos);
+
+        const add = (to) => {
             if (!this.isValidPosition(to)) return;
-            const target = this.board[to];
-            if (!target || target.cor !== piece.cor) moves.push(to);
+            const tgt = this.board[to];
+            if (!tgt || tgt.cor !== piece.cor) moves.push(to);
         };
 
-        const row = Math.floor(pos / 8);
-        const col = pos % 8;
+        switch (piece.tipo) {
+            case "♙": // peão branco
+                if (r > 0 && !this.board[pos - 8]) add(pos - 8);
+                if (r === 6 && !this.board[pos - 8] && !this.board[pos - 16]) add(pos - 16);
+                if (c > 0 && this.board[pos - 9] && this.board[pos - 9].cor === "pretas") add(pos - 9);
+                if (c < 7 && this.board[pos - 7] && this.board[pos - 7].cor === "pretas") add(pos - 7);
+                break;
 
-        switch(piece.tipo) {
-            case '♙':
-                if (row > 0 && !this.board[pos - 8]) moves.push(pos - 8);
-                if (row === 6 && !this.board[pos - 8] && !this.board[pos - 16]) moves.push(pos - 16);
-                if (col > 0 && this.board[pos - 9] && this.board[pos - 9].cor === 'pretas') moves.push(pos - 9);
-                if (col < 7 && this.board[pos - 7] && this.board[pos - 7].cor === 'pretas') moves.push(pos - 7);
+            case "♟": // peão preto
+                if (r < 7 && !this.board[pos + 8]) add(pos + 8);
+                if (r === 1 && !this.board[pos + 8] && !this.board[pos + 16]) add(pos + 16);
+                if (c < 7 && this.board[pos + 9] && this.board[pos + 9].cor === "brancas") add(pos + 9);
+                if (c > 0 && this.board[pos + 7] && this.board[pos + 7].cor === "brancas") add(pos + 7);
                 break;
-            case '♟':
-                if (row < 7 && !this.board[pos + 8]) moves.push(pos + 8);
-                if (row === 1 && !this.board[pos + 8] && !this.board[pos + 16]) moves.push(pos + 16);
-                if (col < 7 && this.board[pos + 9] && this.board[pos + 9].cor === 'brancas') moves.push(pos + 9);
-                if (col > 0 && this.board[pos + 7] && this.board[pos + 7].cor === 'brancas') moves.push(pos + 7);
+
+            case "♖": case "♜":
+                moves.push(...this.getSlidingMoves(pos, [-1,1,-8,8]));
                 break;
-            case '♖': case '♜': moves.push(...this.getSlidingMoves(pos, [-1,1,-8,8])); break;
-            case '♗': case '♝': moves.push(...this.getSlidingMoves(pos, [-9,-7,7,9])); break;
-            case '♕': case '♛': moves.push(...this.getSlidingMoves(pos, [-1,1,-8,8,-9,-7,7,9])); break;
-            case '♘': case '♞': [-17,-15,-10,-6,6,10,15,17].forEach(o => addMove(pos + o)); break;
-            case '♔': case '♚': [-9,-8,-7,-1,1,7,8,9].forEach(o => addMove(pos + o)); break;
+
+            case "♗": case "♝":
+                moves.push(...this.getSlidingMoves(pos, [-9,-7,7,9]));
+                break;
+
+            case "♕": case "♛":
+                moves.push(...this.getSlidingMoves(pos, [-1,1,-8,8,-9,-7,7,9]));
+                break;
+
+            case "♘": case "♞":
+                const k = [-17,-15,-10,-6,6,10,15,17];
+                for (let off of k) {
+                    let to = pos + off;
+                    if (!this.isValidPosition(to)) continue;
+                    if (Math.abs(this.row(to) - r) + Math.abs(this.col(to) - c) === 3) {
+                        const tgt = this.board[to];
+                        if (!tgt || tgt.cor !== piece.cor) moves.push(to);
+                    }
+                }
+                break;
+
+            case "♔": case "♚":
+                const ko = [-9,-8,-7,-1,1,7,8,9];
+                for (let off of ko) {
+                    let to = pos + off;
+                    if (!this.isValidPosition(to)) continue;
+
+                    if (Math.abs(this.row(to) - r) <= 1 &&
+                        Math.abs(this.col(to) - c) <= 1) {
+                        const tgt = this.board[to];
+                        if (!tgt || tgt.cor !== piece.cor) moves.push(to);
+                    }
+                }
+                break;
         }
 
         return moves;
     }
 
+    // ---------------------------------------
+    // FILTRO DE CHEQUE
+    // ---------------------------------------
+    getPossibleMoves(pos) {
+        const moves = this.rawMoves(pos);
+        const res = [];
+
+        for (let to of moves) {
+            if (this.wouldNotLeaveKingInCheck(pos, to)) {
+                res.push(to);
+            }
+        }
+        return res;
+    }
+
+    // Movimento temporário seguro
+    wouldNotLeaveKingInCheck(from, to) {
+        const piece = this.board[from];
+        const backupFrom = piece;
+        const backupTo = this.board[to];
+
+        // aplica
+        this.board[to] = piece;
+        this.board[from] = null;
+
+        const safe = !this.isKingInCheck(piece.cor);
+
+        // desfaz
+        this.board[from] = backupFrom;
+        this.board[to] = backupTo;
+
+        return safe;
+    }
+
+    // ---------------------------------------
+    // CHEQUE
+    // ---------------------------------------
+    isKingInCheck(color) {
+        const kingPos = this.board.findIndex(p =>
+            p && (
+                (p.tipo === "♔" && p.cor === color) ||
+                (p.tipo === "♚" && p.cor === color)
+            )
+        );
+
+        if (kingPos === -1) return false;
+
+        for (let i = 0; i < 64; i++) {
+            const p = this.board[i];
+            if (!p || p.cor === color) continue;
+
+            const moves = this.rawMoves(i);
+            if (moves.includes(kingPos))
+                return true;
+        }
+
+        return false;
+    }
+
+    // ---------------------------------------
+    // CHEQUE-MATE
+    // ---------------------------------------
     isCheckmate(color) {
         if (!this.isKingInCheck(color)) return false;
 
@@ -202,27 +215,10 @@ export class MoveValidator {
             const p = this.board[i];
             if (p && p.cor === color) {
                 const moves = this.getPossibleMoves(i);
-                for (let m of moves) {
-                    const originalPiece = this.board[i];
-                    const targetPiece = this.board[m];
-
-                    // Realiza o movimento temporário
-                    this.board[m] = originalPiece;
-                    this.board[i] = null;
-                    
-                    if (!this.isKingInCheck(color)) {
-                        this.board[i] = originalPiece;
-                        this.board[m] = targetPiece;
-                        return false;
-                    }
-
-                    this.board[i] = originalPiece;
-                    this.board[m] = targetPiece;
-                }
+                if (moves.length > 0) return false;
             }
         }
 
         return true;
     }
 }
-
