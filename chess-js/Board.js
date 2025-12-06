@@ -1,4 +1,4 @@
-// Board.js
+// Board.js - v1
 export class Board {
     constructor() {
         console.log("Board construído!");
