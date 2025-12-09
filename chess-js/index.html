@@ -2,18 +2,31 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jogo de Xadrez</title>
 
-    <!-- Arquivo CSS externo -->
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css"> 
 </head>
 <body>
     <h1>Jogo de Xadrez</h1>
 
+    <div id="difficulty-container">
+        <label for="difficulty">Selecione a Dificuldade: </label>
+        <select id="difficulty">
+            <option value="easy">Fácil</option>
+            <option value="normal">Normal</option>
+            <option value="hard">Difícil</option>
+        </select>
+    </div>
+    
+    <div id="chess-container"></div>
+
+    <button id="restart-btn">🔄 Reiniciar Jogo</button>
+
     <script type="module">
+        // Importa e inicializa o GameController
         import { GameController } from './GameController.js';
-        console.log('[HTML] Inicializando jogo de xadrez');
-        const game = new GameController();
+        new GameController();
     </script>
 </body>
 </html>
