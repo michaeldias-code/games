@@ -1,4 +1,4 @@
-// Piece.js - v1
+// Piece.js
 import { Classes } from './config.js';
 
 export class Piece {
