@@ -43,9 +43,16 @@ h1 {
     border-color: #fff #808080 #808080 #fff;
     box-shadow: 2px 2px 0px #303030;
     max-width: 100vw; /* Garante que não ultrapasse a largura da tela */
+    /* Adicionar overflow para permitir rolagem horizontal no Expert */
+    overflow-x: auto; /* PERMITE ROLAGEM HORIZONTAL NO EXPERT */
+
 }
 
 #top-bar {
+    /* Garante que a barra superior tenha a largura exata do seu conteúdo */
+    width: fit-content; /* NOVO: Garante que a largura da barra superior se ajuste ao seu conteúdo */
+    max-width: 100%;
+
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -97,7 +104,7 @@ h1 {
 /* --- TABULEIRO e CÉLULAS (Responsividade) --- */
 
 #board {
-    display: inline-grid;
+    display: grid;
     /* Usamos a variável --grid-width para definir o número de colunas */
     grid-template-columns: repeat(var(--grid-width), auto); /* CORREÇÃO FINAL: Usar 'auto' para o tamanho */
     gap: 1px;
@@ -115,8 +122,7 @@ h1 {
     /*CORREÇÃO: Usamos 'content-box' para garantir que o tamanho (width/height) 
     não seja afetado pela borda (border-box é geralmente usado, mas content-box
     pode ajudar quando a alocação de espaço está conflitando com a borda 3D). */
-    box-sizing: content-box; 
-
+ 
     /* Estilo 3D da célula fechada */
     border-style: solid;
     border-width: 3px;
