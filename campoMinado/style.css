@@ -85,6 +85,8 @@ h1 {
     border-color: #fff #808080 #808080 #fff;
     outline: none;
     line-height: 1;
+    padding: 0; /* Adicionado para evitar que o padding afete o emoji */
+    box-sizing: border-box; /* Adicionado para melhor controle do tamanho */
 }
 
 #reset-btn:active {
@@ -95,7 +97,7 @@ h1 {
 /* --- TABULEIRO e CÉLULAS (Responsividade) --- */
 
 #board {
-    display: grid;
+    display: inline-grid; /* CORRIGIDO */
     /* As colunas/linhas serão definidas pelo JS (grid-template-columns, grid-template-rows) */
     gap: 1px;
     /* Define o tamanho máximo de célula para telas maiores, mantendo a responsividade */
@@ -104,14 +106,12 @@ h1 {
 }
 
 .cell {
-    /* Tamanho de célula responsivo: 
-       Usa 'min' para ser 30px no máximo, mas se adapta à largura da tela.
-       Você pode ajustar o valor '4.5vw' (4.5% da largura da viewport) */
-    width: min(30px, 4.5vw);
-    height: min(30px, 4.5vw);
+   /* CORRIGIDO: Aumentei para 8vw para ser mais jogável no celular (Iniciante e outros) */
+    width: min(30px, 8vw); 
+    height: min(30px, 8vw);
 
     background: #c0c0c0;
-    
+     
     /* Estilo 3D da célula fechada */
     border-style: solid;
     border-width: 3px;
