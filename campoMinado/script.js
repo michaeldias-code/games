@@ -21,16 +21,29 @@ let gameOver = false;
 let timer = null;
 let seconds = 0;
 
-// Inicializa o seletor de nível e define o evento de mudança
+// Função atualizada para inicializar o seletor de nível
 function initLevelSelect() {
+    // Define um ponto de quebra para celular (largura da tela)
+    const IS_MOBILE = window.innerWidth < 600; // Define como celular se for menor que 600px
+
     for (const key in LEVELS) {
+        // LÓGICA DE FILTRAGEM: Pula o nível 'expert' se for um dispositivo móvel
+        if (IS_MOBILE && key === 'expert') {
+            continue; 
+        }
+
         const option = document.createElement('option');
         option.value = key;
         option.textContent = LEVELS[key].label;
         levelSelect.appendChild(option);
     }
 
-    levelSelect.value = 'beginner';
+    // Se o Expert era o nível inicial e ele foi removido, voltamos para Iniciante.
+    if (levelSelect.value === 'expert' && IS_MOBILE) {
+        levelSelect.value = 'beginner';
+    } else {
+        levelSelect.value = 'beginner';
+    }
 
     levelSelect.addEventListener('change', (e) => {
         setLevel(e.target.value);
