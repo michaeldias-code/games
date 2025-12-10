@@ -97,10 +97,10 @@ h1 {
 /* --- TABULEIRO e CÉLULAS (Responsividade) --- */
 
 #board {
-    display: inline-grid; /* CORRIGIDO */
-    /* As colunas/linhas serão definidas pelo JS (grid-template-columns, grid-template-rows) */
+    display: inline-grid;
+    /* Usamos a variável --grid-width para definir o número de colunas */
+    grid-template-columns: repeat(var(--grid-width), auto); /* CORREÇÃO FINAL: Usar 'auto' para o tamanho */
     gap: 1px;
-    /* Define o tamanho máximo de célula para telas maiores, mantendo a responsividade */
     max-width: 100%; 
     margin: 0 auto;
 }
@@ -111,13 +111,18 @@ h1 {
     height: min(30px, 8vw);
 
     background: #c0c0c0;
-     
+
+    /*CORREÇÃO: Usamos 'content-box' para garantir que o tamanho (width/height) 
+    não seja afetado pela borda (border-box é geralmente usado, mas content-box
+    pode ajudar quando a alocação de espaço está conflitando com a borda 3D). */
+    box-sizing: content-box; 
+
     /* Estilo 3D da célula fechada */
     border-style: solid;
     border-width: 3px;
     border-color: #fff #808080 #808080 #fff;
     
-    font-size: min(18px, 3vw);
+    font-size: min(18px, 5vw); 
     font-weight: bold;
     display: flex;
     align-items: center;
@@ -126,13 +131,15 @@ h1 {
     user-select: none;
 }
 
+/* Aplicando o ajuste de borda para células abertas para uniformidade */
 .cell.open {
     background: #e0e0e0;
     /* Célula aberta: borda afundada */
     border-style: solid;
-    border-width: 1px;
+    border-width: 1px; /* Mantenha 1px */
     border-color: #808080; 
     cursor: default;
+    box-sizing: content-box; /* Garante que células abertas e fechadas usem o mesmo modelo */
 }
 
 .cell.flag {
