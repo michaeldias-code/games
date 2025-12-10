@@ -73,10 +73,10 @@ function startGame() {
     board.innerHTML = "";
     
     // Atualiza o grid CSS para o novo tamanho do tabuleiro (responsividade)
-    board.style.gridTemplateColumns = `repeat(${width}, minmax(18px, 1fr))`;
-    board.style.gridTemplateRows = `repeat(${height}, minmax(18px, 1fr))`;
-    //board.style.width = `calc(${width} * min(30px, 4.5vw) + ${width - 1}px)`; // Ajusta a largura (aproximada)
-    board.style.setProperty('--grid-width', width); 
+     board.style.gridTemplateColumns = `repeat(${width}, auto)`;
+     board.style.gridTemplateRows = `repeat(${height}, auto)`;
+   //board.style.width = `calc(${width} * min(30px, 4.5vw) + ${width - 1}px)`; // Ajusta a largura (aproximada)
+   //board.style.setProperty('--grid-width', width); 
 
     // criar células
     for (let y = 0; y < height; y++) {
@@ -282,4 +282,3 @@ resetBtn.addEventListener("click", () => {
 // Inicia o seletor de nível e o jogo
 initLevelSelect();
 startGame();
-
